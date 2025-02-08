@@ -11,7 +11,7 @@ Screen1ViewBase::Screen1ViewBase()
     add(__background);
 
     box1.setPosition(0, 0, 240, 320);
-    box1.setColor(touchgfx::Color::getColorFromRGB(158, 10, 250));
+    box1.setColor(touchgfx::Color::getColorFromRGB(46, 13, 13));
     add(box1);
 }
 

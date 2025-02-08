@@ -10,9 +10,9 @@
             "Width": 240,
             "Height": 320,
             "Color": {
-              "Red": 158,
-              "Green": 10,
-              "Blue": 250
+              "Red": 46,
+              "Green": 13,
+              "Blue": 13
             }
           }
         ],
@@ -69,7 +69,7 @@
     "SubFamily": "STM32F429/439",
     "Toolchain": "STM32CubeIDE",
     "Platform": "m4",
-    "ProjectFile": "../STM32F429I_DISCO_REV_E01.ioc",
+    "ProjectFile": "../robot_firmware.ioc",
     "OptionalComponentsRoot": "../Middlewares/ST/touchgfx_components",
     "OptionalComponents": [],
     "AdditionalFeatures": [

@@ -2,10 +2,10 @@ Structure du dossier pour le volume Acer
 Le numéro de série du volume est C040-4F1C
 C:.
 |   .extSettings
-|   backup_STM32F429I_DISCO_REV_E01.ioc
+|   backup_robot_firmware.ioc
 |   changelog.txt
 |   readme.md
-|   STM32F429I_DISCO_REV_E01.ioc
+|   robot_firmware.ioc
 |   structure.txt
 |   
 +---Core
@@ -184,9 +184,9 @@ C:.
 |               
 +---EWARM
 |       Project.eww
+|       robot_firmware.ewd
+|       robot_firmware.ewp
 |       startup_stm32f429xx.s
-|       STM32F429I_DISCO_REV_E01.ewd
-|       STM32F429I_DISCO_REV_E01.ewp
 |       stm32f429xx_flash.icf
 |       stm32f429xx_sram.icf
 |       
@@ -214,10 +214,10 @@ C:.
 |                               heap_4.c
 |                               
 +---MDK-ARM
+|       robot_firmware.sct
+|       robot_firmware.uvoptx
+|       robot_firmware.uvprojx
 |       startup_stm32f429xx.s
-|       STM32F429I_DISCO_REV_E01.sct
-|       STM32F429I_DISCO_REV_E01.uvoptx
-|       STM32F429I_DISCO_REV_E01.uvprojx
 |       
 +---Middlewares
 |   +---ST
@@ -1026,7 +1026,7 @@ C:.
 +---STM32CubeIDE
 |   |   .cproject
 |   |   .project
-|   |   STM32F429I-DISCO Debug.launch
+|   |   robot_firmware Debug.launch
 |   |   STM32F429ZITX_FLASH.ld
 |   |   STM32F429ZITX_RAM.ld
 |   |   
@@ -1053,11 +1053,11 @@ C:.
 |   |   |   makefile
 |   |   |   objects.list
 |   |   |   objects.mk
+|   |   |   robot_firmware.elf
+|   |   |   robot_firmware.hex
+|   |   |   robot_firmware.list
+|   |   |   robot_firmware.map
 |   |   |   sources.mk
-|   |   |   STM32F429I-DISCO.elf
-|   |   |   STM32F429I-DISCO.hex
-|   |   |   STM32F429I-DISCO.list
-|   |   |   STM32F429I-DISCO.map
 |   |   |   
 |   |   +---Application
 |   |   |   +---Startup
@@ -1133,6 +1133,10 @@ C:.
 |   |   |       |       GeneratedFont.d
 |   |   |       |       GeneratedFont.o
 |   |   |       |       GeneratedFont.su
+|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.cyclo
+|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.d
+|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.o
+|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.su
 |   |   |       |       Kerning_verdana_10_4bpp.cyclo
 |   |   |       |       Kerning_verdana_10_4bpp.d
 |   |   |       |       Kerning_verdana_10_4bpp.o
@@ -1453,6 +1457,7 @@ C:.
     |   |       verdana.ttf
     |   |       
     |   +---images
+    |   |   \---__generated
     |   \---texts
     |           texts.xml
     |           texts.xsd

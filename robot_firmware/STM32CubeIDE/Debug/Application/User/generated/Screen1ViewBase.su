@@ -15,13 +15,18 @@
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Screen.hpp:115:18:virtual void touchgfx::Screen::tearDownScreen()	0	static
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Screen.hpp:144:18:virtual void touchgfx::Screen::handleTickEvent()	0	static
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Screen.hpp:154:18:virtual void touchgfx::Screen::handleKeyEvent(uint8_t)	0	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:61:34:virtual touchgfx::HAL::RenderingMethod touchgfx::AbstractPainter::getRenderingMethod() const	0	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:78:18:virtual bool touchgfx::AbstractPainter::setup(const touchgfx::Rect&) const	0	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainter.hpp:90:18:virtual void touchgfx::AbstractPainter::tearDown() const	0	static
 ../../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:36:7:touchgfx::View<Screen1Presenter>::~View()	0	static
-C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:18:1:Screen1ViewBase::~Screen1ViewBase()	0	static
-C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:23:6:virtual void Screen1ViewBase::setupScreen()	0	static
+C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:50:6:virtual void Screen1ViewBase::setupScreen()	0	static
 ../../Middlewares/ST/touchgfx/framework/include/mvp/View.hpp:36:7:virtual touchgfx::View<Screen1Presenter>::~View()	8	static
-C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:18:1:virtual Screen1ViewBase::~Screen1ViewBase()	8	static
+C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:45:1:Screen1ViewBase::~Screen1ViewBase()	8	static
+C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:45:1:virtual Screen1ViewBase::~Screen1ViewBase()	8	static
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:121:18:virtual void touchgfx::Drawable::invalidateContent() const	0	static
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Widget.hpp:45:18:virtual void touchgfx::Widget::getLastChild(int16_t, int16_t, touchgfx::Drawable**)	0	static
-../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:233:10:void touchgfx::Drawable::setPosition(int16_t, int16_t, int16_t, int16_t)	24	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:343:10:void touchgfx::Drawable::setXY(int16_t, int16_t)	16	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/Drawable.hpp:233:10:void touchgfx::Drawable::setPosition(int16_t, int16_t, int16_t, int16_t)	16	static
 ../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Box.hpp:33:5:touchgfx::Box::Box()	0	static
-C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:7:1:Screen1ViewBase::Screen1ViewBase()	40	static
+../../Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/canvas/AbstractPainterRGB565.hpp:41:5:touchgfx::AbstractPainterRGB565::AbstractPainterRGB565()	16	static
+C:/Users/Jocelyn/Documents/GitHub/CDFR2025/robot_firmware/TouchGFX/generated/gui_generated/src/screen1_screen/Screen1ViewBase.cpp:9:1:Screen1ViewBase::Screen1ViewBase()	64	static
