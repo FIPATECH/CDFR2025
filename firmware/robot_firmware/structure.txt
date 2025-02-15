@@ -12,16 +12,20 @@ C:.
 |   +---Inc
 |   |       FreeRTOSConfig.h
 |   |       main.h
+|   |       odometry.h
 |   |       RTE_Components.h
 |   |       stm32f4xx_hal_conf.h
 |   |       stm32f4xx_it.h
+|   |       strategy_manager.h
 |   |       
 |   +---Src
 |   |       freertos.c
 |   |       main.c
+|   |       odometry.c
 |   |       stm32f4xx_hal_msp.c
 |   |       stm32f4xx_hal_timebase_tim.c
 |   |       stm32f4xx_it.c
+|   |       strategy_manager.c
 |   |       system_stm32f4xx.c
 |   |       
 |   \---Startup
@@ -62,11 +66,13 @@ C:.
 |   |   |       \---STM32F4xx
 |   |   |           |   LICENSE.txt
 |   |   |           |   
-|   |   |           \---Include
-|   |   |                   stm32f429xx.h
-|   |   |                   stm32f4xx.h
-|   |   |                   system_stm32f4xx.h
-|   |   |                   
+|   |   |           +---Include
+|   |   |           |       stm32f429xx.h
+|   |   |           |       stm32f4xx.h
+|   |   |           |       system_stm32f4xx.h
+|   |   |           |       
+|   |   |           \---Source
+|   |   |               \---Templates
 |   |   \---Include
 |   |           cachel1_armv7.h
 |   |           cmsis_armcc.h
@@ -1074,6 +1080,10 @@ C:.
 |   |   |       |   main.d
 |   |   |       |   main.o
 |   |   |       |   main.su
+|   |   |       |   odometry.cyclo
+|   |   |       |   odometry.d
+|   |   |       |   odometry.o
+|   |   |       |   odometry.su
 |   |   |       |   stm32f4xx_hal_msp.cyclo
 |   |   |       |   stm32f4xx_hal_msp.d
 |   |   |       |   stm32f4xx_hal_msp.o
@@ -1086,6 +1096,10 @@ C:.
 |   |   |       |   stm32f4xx_it.d
 |   |   |       |   stm32f4xx_it.o
 |   |   |       |   stm32f4xx_it.su
+|   |   |       |   strategy_manager.cyclo
+|   |   |       |   strategy_manager.d
+|   |   |       |   strategy_manager.o
+|   |   |       |   strategy_manager.su
 |   |   |       |   subdir.mk
 |   |   |       |   syscalls.cyclo
 |   |   |       |   syscalls.d
@@ -1133,10 +1147,22 @@ C:.
 |   |   |       |       GeneratedFont.d
 |   |   |       |       GeneratedFont.o
 |   |   |       |       GeneratedFont.su
-|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.cyclo
-|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.d
-|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.o
-|   |   |       |       image_alternate_theme_images_widgets_circleprogress_backgrounds_large.su
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.cyclo
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.d
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.o
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.su
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.cyclo
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.d
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.o
+|   |   |       |       image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.su
+|   |   |       |       image_image1.cyclo
+|   |   |       |       image_image1.d
+|   |   |       |       image_image1.o
+|   |   |       |       image_image1.su
+|   |   |       |       image_image2.cyclo
+|   |   |       |       image_image2.d
+|   |   |       |       image_image2.o
+|   |   |       |       image_image2.su
 |   |   |       |       Kerning_verdana_10_4bpp.cyclo
 |   |   |       |       Kerning_verdana_10_4bpp.d
 |   |   |       |       Kerning_verdana_10_4bpp.o
@@ -1157,6 +1183,14 @@ C:.
 |   |   |       |       Screen1ViewBase.d
 |   |   |       |       Screen1ViewBase.o
 |   |   |       |       Screen1ViewBase.su
+|   |   |       |       Screen2ViewBase.cyclo
+|   |   |       |       Screen2ViewBase.d
+|   |   |       |       Screen2ViewBase.o
+|   |   |       |       Screen2ViewBase.su
+|   |   |       |       Screen3ViewBase.cyclo
+|   |   |       |       Screen3ViewBase.d
+|   |   |       |       Screen3ViewBase.o
+|   |   |       |       Screen3ViewBase.su
 |   |   |       |       subdir.mk
 |   |   |       |       SVGDatabase.cyclo
 |   |   |       |       SVGDatabase.d
@@ -1208,6 +1242,22 @@ C:.
 |   |   |       |       Screen1View.d
 |   |   |       |       Screen1View.o
 |   |   |       |       Screen1View.su
+|   |   |       |       Screen2Presenter.cyclo
+|   |   |       |       Screen2Presenter.d
+|   |   |       |       Screen2Presenter.o
+|   |   |       |       Screen2Presenter.su
+|   |   |       |       Screen2View.cyclo
+|   |   |       |       Screen2View.d
+|   |   |       |       Screen2View.o
+|   |   |       |       Screen2View.su
+|   |   |       |       Screen3Presenter.cyclo
+|   |   |       |       Screen3Presenter.d
+|   |   |       |       Screen3Presenter.o
+|   |   |       |       Screen3Presenter.su
+|   |   |       |       Screen3View.cyclo
+|   |   |       |       Screen3View.d
+|   |   |       |       Screen3View.o
+|   |   |       |       Screen3View.su
 |   |   |       |       subdir.mk
 |   |   |       |       
 |   |   |       \---TouchGFX
@@ -1457,7 +1507,13 @@ C:.
     |   |       verdana.ttf
     |   |       
     |   +---images
+    |   |   |   image1.png
+    |   |   |   image2.png
+    |   |   |   
     |   |   \---__generated
+    |   |           alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.png
+    |   |           alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.png
+    |   |           
     |   \---texts
     |           texts.xml
     |           texts.xsd
@@ -1515,17 +1571,39 @@ C:.
     |   |   |   |       |       FrontendApplicationBase.d
     |   |   |   |       |       FrontendApplicationBase.o
     |   |   |   |       |       
-    |   |   |   |       \---screen1_screen
-    |   |   |   |               Screen1ViewBase.d
-    |   |   |   |               Screen1ViewBase.o
+    |   |   |   |       +---screen1_screen
+    |   |   |   |       |       Screen1ViewBase.d
+    |   |   |   |       |       Screen1ViewBase.o
+    |   |   |   |       |       
+    |   |   |   |       +---screen2_screen
+    |   |   |   |       |       Screen2ViewBase.d
+    |   |   |   |       |       Screen2ViewBase.o
+    |   |   |   |       |       
+    |   |   |   |       \---screen3_screen
+    |   |   |   |               Screen3ViewBase.d
+    |   |   |   |               Screen3ViewBase.o
     |   |   |   |               
     |   |   |   +---images
     |   |   |   |   \---src
-    |   |   |   |           BitmapDatabase.d
-    |   |   |   |           BitmapDatabase.o
-    |   |   |   |           SVGDatabase.d
-    |   |   |   |           SVGDatabase.o
-    |   |   |   |           
+    |   |   |   |       |   BitmapDatabase.d
+    |   |   |   |       |   BitmapDatabase.o
+    |   |   |   |       |   image_image1.d
+    |   |   |   |       |   image_image1.o
+    |   |   |   |       |   image_image2.d
+    |   |   |   |       |   image_image2.o
+    |   |   |   |       |   SVGDatabase.d
+    |   |   |   |       |   SVGDatabase.o
+    |   |   |   |       |   
+    |   |   |   |       \---__generated
+    |   |   |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.d
+    |   |   |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.o
+    |   |   |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.d
+    |   |   |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.o
+    |   |   |   |               image_alternate_theme_images_widgets_swipecontainer_medium_off_normal.d
+    |   |   |   |               image_alternate_theme_images_widgets_swipecontainer_medium_off_normal.o
+    |   |   |   |               image_alternate_theme_images_widgets_swipecontainer_medium_on_active.d
+    |   |   |   |               image_alternate_theme_images_widgets_swipecontainer_medium_on_active.o
+    |   |   |   |               
     |   |   |   +---simulator
     |   |   |   |   \---src
     |   |   |   |       |   mainBase.d
@@ -1554,11 +1632,23 @@ C:.
     |   |   |       |       Model.d
     |   |   |       |       Model.o
     |   |   |       |       
-    |   |   |       \---screen1_screen
-    |   |   |               Screen1Presenter.d
-    |   |   |               Screen1Presenter.o
-    |   |   |               Screen1View.d
-    |   |   |               Screen1View.o
+    |   |   |       +---screen1_screen
+    |   |   |       |       Screen1Presenter.d
+    |   |   |       |       Screen1Presenter.o
+    |   |   |       |       Screen1View.d
+    |   |   |       |       Screen1View.o
+    |   |   |       |       
+    |   |   |       +---screen2_screen
+    |   |   |       |       Screen2Presenter.d
+    |   |   |       |       Screen2Presenter.o
+    |   |   |       |       Screen2View.d
+    |   |   |       |       Screen2View.o
+    |   |   |       |       
+    |   |   |       \---screen3_screen
+    |   |   |               Screen3Presenter.d
+    |   |   |               Screen3Presenter.o
+    |   |   |               Screen3View.d
+    |   |   |               Screen3View.o
     |   |   |               
     |   |   +---simulator
     |   |   |       main.d
@@ -1590,6 +1680,8 @@ C:.
     |       |           freertos.o
     |       |           main.d
     |       |           main.o
+    |       |           odometry.d
+    |       |           odometry.o
     |       |           stm32f4xx_hal_msp.d
     |       |           stm32f4xx_hal_msp.o
     |       |           stm32f4xx_hal_timebase_tim.d
@@ -1752,17 +1844,35 @@ C:.
     |           |   |       |       FrontendApplicationBase.d
     |           |   |       |       FrontendApplicationBase.o
     |           |   |       |       
-    |           |   |       \---screen1_screen
-    |           |   |               Screen1ViewBase.d
-    |           |   |               Screen1ViewBase.o
+    |           |   |       +---screen1_screen
+    |           |   |       |       Screen1ViewBase.d
+    |           |   |       |       Screen1ViewBase.o
+    |           |   |       |       
+    |           |   |       +---screen2_screen
+    |           |   |       |       Screen2ViewBase.d
+    |           |   |       |       Screen2ViewBase.o
+    |           |   |       |       
+    |           |   |       \---screen3_screen
+    |           |   |               Screen3ViewBase.d
+    |           |   |               Screen3ViewBase.o
     |           |   |               
     |           |   +---images
     |           |   |   \---src
-    |           |   |           BitmapDatabase.d
-    |           |   |           BitmapDatabase.o
-    |           |   |           SVGDatabase.d
-    |           |   |           SVGDatabase.o
-    |           |   |           
+    |           |   |       |   BitmapDatabase.d
+    |           |   |       |   BitmapDatabase.o
+    |           |   |       |   image_image1.d
+    |           |   |       |   image_image1.o
+    |           |   |       |   image_image2.d
+    |           |   |       |   image_image2.o
+    |           |   |       |   SVGDatabase.d
+    |           |   |       |   SVGDatabase.o
+    |           |   |       |   
+    |           |   |       \---__generated
+    |           |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.d
+    |           |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.o
+    |           |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.d
+    |           |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.o
+    |           |   |               
     |           |   \---texts
     |           |       \---src
     |           |               LanguageGb.d
@@ -1782,11 +1892,23 @@ C:.
     |           |       |       Model.d
     |           |       |       Model.o
     |           |       |       
-    |           |       \---screen1_screen
-    |           |               Screen1Presenter.d
-    |           |               Screen1Presenter.o
-    |           |               Screen1View.d
-    |           |               Screen1View.o
+    |           |       +---screen1_screen
+    |           |       |       Screen1Presenter.d
+    |           |       |       Screen1Presenter.o
+    |           |       |       Screen1View.d
+    |           |       |       Screen1View.o
+    |           |       |       
+    |           |       +---screen2_screen
+    |           |       |       Screen2Presenter.d
+    |           |       |       Screen2Presenter.o
+    |           |       |       Screen2View.d
+    |           |       |       Screen2View.o
+    |           |       |       
+    |           |       \---screen3_screen
+    |           |               Screen3Presenter.d
+    |           |               Screen3Presenter.o
+    |           |               Screen3View.d
+    |           |               Screen3View.o
     |           |               
     |           \---target
     |               |   STM32TouchController.d
@@ -1862,15 +1984,27 @@ C:.
     |   |   |       |       FrontendHeapBase.hpp
     |   |   |       |       SimConstants.hpp
     |   |   |       |       
-    |   |   |       \---screen1_screen
-    |   |   |               Screen1ViewBase.hpp
+    |   |   |       +---screen1_screen
+    |   |   |       |       Screen1ViewBase.hpp
+    |   |   |       |       
+    |   |   |       +---screen2_screen
+    |   |   |       |       Screen2ViewBase.hpp
+    |   |   |       |       
+    |   |   |       \---screen3_screen
+    |   |   |               Screen3ViewBase.hpp
     |   |   |               
     |   |   \---src
     |   |       +---common
     |   |       |       FrontendApplicationBase.cpp
     |   |       |       
-    |   |       \---screen1_screen
-    |   |               Screen1ViewBase.cpp
+    |   |       +---screen1_screen
+    |   |       |       Screen1ViewBase.cpp
+    |   |       |       
+    |   |       +---screen2_screen
+    |   |       |       Screen2ViewBase.cpp
+    |   |       |       
+    |   |       \---screen3_screen
+    |   |               Screen3ViewBase.cpp
     |   |               
     |   +---images
     |   |   +---include
@@ -1881,9 +2015,15 @@ C:.
     |   |   |           SVGDatabase.hpp
     |   |   |           
     |   |   \---src
-    |   |           BitmapDatabase.cpp
-    |   |           SVGDatabase.cpp
-    |   |           
+    |   |       |   BitmapDatabase.cpp
+    |   |       |   image_image1.cpp
+    |   |       |   image_image2.cpp
+    |   |       |   SVGDatabase.cpp
+    |   |       |   
+    |   |       \---__generated
+    |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.cpp
+    |   |               image_alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.cpp
+    |   |               
     |   +---simulator
     |   |   |   touchgfx.ico
     |   |   |   touchgfx.rc
@@ -1949,9 +2089,17 @@ C:.
     |   |       |       Model.hpp
     |   |       |       ModelListener.hpp
     |   |       |       
-    |   |       \---screen1_screen
-    |   |               Screen1Presenter.hpp
-    |   |               Screen1View.hpp
+    |   |       +---screen1_screen
+    |   |       |       Screen1Presenter.hpp
+    |   |       |       Screen1View.hpp
+    |   |       |       
+    |   |       +---screen2_screen
+    |   |       |       Screen2Presenter.hpp
+    |   |       |       Screen2View.hpp
+    |   |       |       
+    |   |       \---screen3_screen
+    |   |               Screen3Presenter.hpp
+    |   |               Screen3View.hpp
     |   |               
     |   \---src
     |       +---common
@@ -1960,9 +2108,17 @@ C:.
     |       +---model
     |       |       Model.cpp
     |       |       
-    |       \---screen1_screen
-    |               Screen1Presenter.cpp
-    |               Screen1View.cpp
+    |       +---screen1_screen
+    |       |       Screen1Presenter.cpp
+    |       |       Screen1View.cpp
+    |       |       
+    |       +---screen2_screen
+    |       |       Screen2Presenter.cpp
+    |       |       Screen2View.cpp
+    |       |       
+    |       \---screen3_screen
+    |               Screen3Presenter.cpp
+    |               Screen3View.cpp
     |               
     +---simulator
     |   |   main.cpp

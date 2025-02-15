@@ -3,16 +3,17 @@
 /*********************************************************************************/
 #include <gui_generated/screen1_screen/Screen1ViewBase.hpp>
 #include <touchgfx/Color.hpp>
+#include <images/BitmapDatabase.hpp>
 
 Screen1ViewBase::Screen1ViewBase()
 {
-    __background.setPosition(0, 0, 240, 320);
+    __background.setPosition(0, 0, 320, 240);
     __background.setColor(touchgfx::Color::getColorFromRGB(0, 0, 0));
     add(__background);
 
-    box1.setPosition(0, 0, 240, 320);
-    box1.setColor(touchgfx::Color::getColorFromRGB(255, 174, 0));
-    add(box1);
+    image1.setXY(0, 0);
+    image1.setBitmap(touchgfx::Bitmap(BITMAP_IMAGE1_ID));
+    add(image1);
 }
 
 Screen1ViewBase::~Screen1ViewBase()

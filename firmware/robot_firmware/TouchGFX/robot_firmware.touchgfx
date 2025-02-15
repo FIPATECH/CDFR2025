@@ -5,13 +5,165 @@
         "Name": "Screen1",
         "Components": [
           {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 320,
+            "Height": 240,
+            "RelativeFilename": "image1.png"
+          }
+        ],
+        "Interactions": []
+      },
+      {
+        "Name": "Screen2",
+        "CanvasBufferSize": 4800,
+        "Components": [
+          {
+            "Type": "Image",
+            "Name": "image1",
+            "Width": 320,
+            "Height": 213,
+            "LockPosition": true,
+            "RelativeFilename": "image2.png"
+          },
+          {
             "Type": "Box",
             "Name": "box1",
-            "Width": 240,
-            "Height": 320,
+            "Y": 213,
+            "Width": 320,
+            "Height": 27,
+            "LockPosition": true,
+            "Color": {
+              "Red": 45,
+              "Green": 42,
+              "Blue": 53
+            }
+          },
+          {
+            "Type": "Line",
+            "Name": "line1",
+            "Y": 213,
+            "Width": 320,
+            "Height": 27,
+            "LockPosition": true,
             "Color": {
               "Red": 255,
-              "Green": 174
+              "Green": 255,
+              "Blue": 255
+            },
+            "EndX": 350.0,
+            "LineWidth": 2.0,
+            "LineEndingStyle": "Butt"
+          },
+          {
+            "Type": "Circle",
+            "Name": "circle1",
+            "X": 160,
+            "Y": 120,
+            "Width": 40,
+            "Height": 40,
+            "Color": {
+              "Red": 235,
+              "Green": 35,
+              "Blue": 35
+            },
+            "CenterX": 20.0,
+            "CenterY": 20.0,
+            "Radius": 20.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt",
+            "Draggable": true
+          },
+          {
+            "Type": "ButtonWithLabel",
+            "Name": "buttonWithLabel1",
+            "X": 15,
+            "Y": 195,
+            "Width": 290,
+            "Height": 36,
+            "LockPosition": true,
+            "Pressed": "__generated\\alternate_theme_images_widgets_button_regular_height_36_large_round_pressed.png",
+            "Released": "__generated\\alternate_theme_images_widgets_button_regular_height_36_large_round_disabled.png",
+            "TextId": "__SingleUse_N9OZ",
+            "ReleasedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "PressedColor": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "TextRotation": "0",
+            "Clickable": true
+          },
+          {
+            "Type": "Circle",
+            "Name": "circle2",
+            "Width": 40,
+            "Height": 40,
+            "Color": {
+              "Red": 255,
+              "Green": 255,
+              "Blue": 255
+            },
+            "CenterX": 20.0,
+            "CenterY": 20.0,
+            "Radius": 20.0,
+            "EndAngle": 360.0,
+            "CapPrecision": "Butt"
+          }
+        ],
+        "Interactions": [
+          {
+            "InteractionName": "Interaction1",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "buttonWithLabel1"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "sendStrategy"
+            }
+          },
+          {
+            "InteractionName": "Interaction2",
+            "Trigger": {
+              "Type": "TriggerPhysicalButtonClicked",
+              "ButtonKey": 97
+            },
+            "Action": {
+              "Type": "ActionGotoScreen",
+              "ScreenTransitionType": "ScreenTransitionBlock",
+              "ActionComponent": "Screen3"
+            }
+          },
+          {
+            "InteractionName": "Interaction3",
+            "Trigger": {
+              "Type": "TriggerClicked",
+              "TriggerComponent": "buttonWithLabel1"
+            },
+            "Action": {
+              "Type": "ActionCustom",
+              "FunctionName": "function2"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "Screen3",
+        "Components": [
+          {
+            "Type": "Box",
+            "Name": "box1",
+            "Width": 320,
+            "Height": 240,
+            "Color": {
+              "Red": 16,
+              "Green": 143,
+              "Blue": 20
             }
           }
         ],
@@ -25,7 +177,7 @@
       "Height": 320
     },
     "SelectedColorDepth": 16,
-    "StartupScreenName": "Screen1",
+    "StartupScreenName": "Screen2",
     "SelectedStartupLanguage": "GB",
     "TouchGfxPath": "../Middlewares/ST/touchgfx",
     "UIPath": ".",
@@ -63,7 +215,7 @@
     "LandscapeSkinY": 0,
     "PortraitSkinX": 0,
     "PortraitSkinY": 0,
-    "DisplayOrientation": "Portrait",
+    "DisplayOrientation": "Landscape",
     "Family": "STM32F4",
     "SubFamily": "STM32F429/439",
     "Toolchain": "STM32CubeIDE",

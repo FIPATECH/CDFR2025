@@ -6,6 +6,10 @@
 #include <touchgfx/hal/Types.hpp>
 #include <touchgfx/Bitmap.hpp>
 
+const uint16_t BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_LARGE_ROUND_DISABLED_ID = 0;
+const uint16_t BITMAP_ALTERNATE_THEME_IMAGES_WIDGETS_BUTTON_REGULAR_HEIGHT_36_LARGE_ROUND_PRESSED_ID = 1;
+const uint16_t BITMAP_IMAGE1_ID = 2;
+const uint16_t BITMAP_IMAGE2_ID = 3;
 
 namespace BitmapDatabase
 {
