@@ -1,0 +1,13 @@
+{
+  "name": "jetson-server",
+  "version": "1.0.0",
+  "description": "Serveur WebSocket pour tester la communication entre la Jetson et un client PC",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  }
+}

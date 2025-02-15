@@ -19,3 +19,5 @@ firmware/robot_firmware/STM32CubeIDE/Debug/
 *.suo
 *.ilk
 *.pdb
+
+software/server/node_modules/
