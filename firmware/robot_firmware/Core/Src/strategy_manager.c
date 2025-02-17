@@ -1,16 +1,16 @@
 #include "../Inc/strategy_manager.h"
-// #include "../Inc/uart_comm.h"
+#include "../Inc/uart_handler.h"
 #include <stdio.h>
 
-void applyStrategy(Color teamColor, Zone myZone, Zone enemyZone)
+void applyStrategy(Color teamColor, Zone teamZone, Zone enemyZone)
 {
-    Strategie strat;
-    strat.couleur = teamColor;
-    strat.myzone = myZone;
+    Strategy strat;
+    strat.color = teamColor;
+    strat.teamzone = teamZone;
     strat.ennemyzone = enemyZone;
 
     char msg[50];
-    sprintf(msg, "STRATEGY:%d:%d:%d", strat.couleur, strat.myzone, strat.ennemyzone);
+    sprintf(msg, "STRATEGY:%d:%d:%d\n", strat.color, strat.teamzone, strat.ennemyzone);
 
-    // uart_send(msg);
+    uart_send_raw(msg);
 }

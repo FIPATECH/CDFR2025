@@ -23,7 +23,7 @@ void Screen2View::sendStrategy()
     int circle2_x = circle2.getX(); // Robot adverse
     int circle2_y = circle2.getY();
 
-    Zone myZone;
+    Zone teamZone;
     Zone enemyZone;
     Color teamColor;
 
@@ -41,11 +41,11 @@ void Screen2View::sendStrategy()
     if (circle1_x < 160 && circle2_x < 160)
     {
         if (circle1_y < 160)
-            myZone = HAUT_GAUCHE;
+            teamZone = HAUT_GAUCHE;
         else if (circle1_y > 160)
-            myZone = BAS_GAUCHE;
+            teamZone = BAS_GAUCHE;
         else
-            myZone = CENTRE_GAUCHE;
+            teamZone = CENTRE_GAUCHE;
 
         if (circle2_y < 160)
             enemyZone = HAUT_GAUCHE;
@@ -54,17 +54,17 @@ void Screen2View::sendStrategy()
         else
             enemyZone = CENTRE_GAUCHE;
 
-        applyStrategy(teamColor, myZone, enemyZone);
+        applyStrategy(teamColor, teamZone, enemyZone);
     }
     // Cas 2 : les deux robots sur la moitié droite
     else if (circle1_x >= 160 && circle2_x >= 160)
     {
         if (circle1_y < 160)
-            myZone = HAUT_DROITE;
+            teamZone = HAUT_DROITE;
         else if (circle1_y > 160)
-            myZone = BAS_DROITE;
+            teamZone = BAS_DROITE;
         else
-            myZone = CENTRE_DROITE;
+            teamZone = CENTRE_DROITE;
 
         if (circle2_y < 160)
             enemyZone = HAUT_DROITE;
@@ -73,7 +73,7 @@ void Screen2View::sendStrategy()
         else
             enemyZone = CENTRE_DROITE;
 
-        applyStrategy(teamColor, myZone, enemyZone);
+        applyStrategy(teamColor, teamZone, enemyZone);
     }
     // Cas 3 : les robots se trouvent dans des moitiés différentes
     else
@@ -82,20 +82,20 @@ void Screen2View::sendStrategy()
         if (circle1_x < 160)
         {
             if (circle1_y < 160)
-                myZone = HAUT_GAUCHE;
+                teamZone = HAUT_GAUCHE;
             else if (circle1_y > 160)
-                myZone = BAS_GAUCHE;
+                teamZone = BAS_GAUCHE;
             else
-                myZone = CENTRE_GAUCHE;
+                teamZone = CENTRE_GAUCHE;
         }
         else
         {
             if (circle1_y < 160)
-                myZone = HAUT_DROITE;
+                teamZone = HAUT_DROITE;
             else if (circle1_y > 160)
-                myZone = BAS_DROITE;
+                teamZone = BAS_DROITE;
             else
-                myZone = CENTRE_DROITE;
+                teamZone = CENTRE_DROITE;
         }
         // Pour le robot adverse
         if (circle2_x < 160)
@@ -117,6 +117,6 @@ void Screen2View::sendStrategy()
                 enemyZone = CENTRE_DROITE;
         }
 
-        applyStrategy(teamColor, myZone, enemyZone);
+        applyStrategy(teamColor, teamZone, enemyZone);
     }
 }

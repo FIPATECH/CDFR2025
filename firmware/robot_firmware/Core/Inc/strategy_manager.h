@@ -24,12 +24,12 @@ extern "C"
 
     typedef struct
     {
-        int couleur;
-        int myzone;
+        int color;
+        int teamzone;
         int ennemyzone;
-    } Strategie;
+    } Strategy;
 
-    void applyStrategy(Color teamColor, Zone myZone, Zone enemyZone);
+    void applyStrategy(Color teamColor, Zone teamZone, Zone enemyZone);
 
 #ifdef __cplusplus
 }

@@ -35,6 +35,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Application/User/circular_buffer.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/circular_buffer.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/freertos.c</name>
 			<type>1</type>
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Core/Src/freertos.c</locationURI>
@@ -68,6 +73,11 @@
 			<name>Application/User/strategy_manager.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/strategy_manager.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/uart_handler.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/uart_handler.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/CMSIS/system_stm32f4xx.c</name>
