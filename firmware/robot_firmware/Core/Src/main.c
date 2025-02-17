@@ -92,7 +92,13 @@ const osThreadAttr_t GUI_Task_attributes = {
     .priority = (osPriority_t)osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+/* Definitions for UART_Task */
+osThreadId_t UART_TaskHandle;
+const osThreadAttr_t UART_Task_attributes = {
+    .name = "UART_Task",
+    .stack_size = 512 * 4,
+    .priority = (osPriority_t)osPriorityAboveNormal,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -134,6 +140,9 @@ void IOE_Delay(uint32_t Delay);
 void IOE_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
 uint8_t IOE_Read(uint8_t Addr, uint8_t Reg);
 uint16_t IOE_ReadMultiple(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
+
+/* Tasks */
+void UART_Task(void *argument);
 
 /* USER CODE END PFP */
 
@@ -215,6 +224,7 @@ int main(void)
   GUI_TaskHandle = osThreadNew(TouchGFX_Task, NULL, &GUI_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+  UART_TaskHandle = osThreadNew(UART_Task, NULL, &UART_Task_attributes);
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
@@ -976,10 +986,26 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    uart_send_raw("Hello Jetson!\r\n");
+    UART_Send_Raw("Hello Jetson!\r\n");
     osDelay(1000);
   }
   /* USER CODE END 5 */
+}
+
+/**
+ * @brief  Tâche UART
+ * Cette tâche est dédiée au traitement des données reçues par UART.
+ * Elle appelle régulièrement la fonction UART_Process_Data() qui décode
+ * les trames reçues (basées sur une machine à états) à partir du buffer RX.
+ */
+void UART_Task(void *argument)
+{
+  /* Infinite loop */
+  for (;;)
+  {
+    UART_Process_Data();
+    osDelay(10);
+  }
 }
 
 /**

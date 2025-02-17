@@ -27,7 +27,7 @@ public:
     /*
      * Virtual Action Handlers
      */
-    virtual void sendStrategy()
+    virtual void Send_Strategy()
     {
         // Override and implement this function in Screen2
     }

@@ -124,7 +124,7 @@
             },
             "Action": {
               "Type": "ActionCustom",
-              "FunctionName": "sendStrategy"
+              "FunctionName": "Send_Strategy"
             }
           },
           {

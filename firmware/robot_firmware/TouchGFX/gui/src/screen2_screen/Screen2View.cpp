@@ -15,7 +15,7 @@ void Screen2View::tearDownScreen()
     Screen2ViewBase::tearDownScreen();
 }
 
-void Screen2View::sendStrategy()
+void Screen2View::Send_Strategy()
 {
     // Récupération des coordonnées des deux cercles
     int circle1_x = circle1.getX(); // Mon robot
@@ -54,7 +54,7 @@ void Screen2View::sendStrategy()
         else
             enemyZone = CENTRE_GAUCHE;
 
-        applyStrategy(teamColor, teamZone, enemyZone);
+        Apply_Strategy(teamColor, teamZone, enemyZone);
     }
     // Cas 2 : les deux robots sur la moitié droite
     else if (circle1_x >= 160 && circle2_x >= 160)
@@ -73,7 +73,7 @@ void Screen2View::sendStrategy()
         else
             enemyZone = CENTRE_DROITE;
 
-        applyStrategy(teamColor, teamZone, enemyZone);
+        Apply_Strategy(teamColor, teamZone, enemyZone);
     }
     // Cas 3 : les robots se trouvent dans des moitiés différentes
     else
@@ -117,6 +117,6 @@ void Screen2View::sendStrategy()
                 enemyZone = CENTRE_DROITE;
         }
 
-        applyStrategy(teamColor, teamZone, enemyZone);
+        Apply_Strategy(teamColor, teamZone, enemyZone);
     }
 }

@@ -76,8 +76,8 @@ void Screen2ViewBase::buttonCallbackHandler(const touchgfx::AbstractButton& src)
     {
         //Interaction1
         //When buttonWithLabel1 clicked call virtual function
-        //Call sendStrategy
-        sendStrategy();
+        //Call Send_Strategy
+        Send_Strategy();
         //Interaction3
         //When buttonWithLabel1 clicked call virtual function
         //Call function2

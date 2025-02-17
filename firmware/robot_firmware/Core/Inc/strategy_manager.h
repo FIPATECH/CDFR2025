@@ -29,7 +29,7 @@ extern "C"
         int ennemyzone;
     } Strategy;
 
-    void applyStrategy(Color teamColor, Zone teamZone, Zone enemyZone);
+    void Apply_Strategy(Color teamColor, Zone teamZone, Zone enemyZone);
 
 #ifdef __cplusplus
 }

@@ -1,0 +1,6 @@
+#ifndef UART_COMMANDS_H
+#define UART_COMMANDS_H
+
+#define UART_CMD_STRATEGY 0x0001
+
+#endif /* UART_COMMANDS_H */

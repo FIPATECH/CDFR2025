@@ -8,39 +8,23 @@ extern "C"
 
 #include "stm32f4xx_hal.h"
 #include <stdint.h>
-#include <stddef.h>
-#include <stdbool.h>
 
-/* Taille du buffer circulaire pour la réception */
-#define RX_BUFFER_SIZE 128
-
-    /**
-     * @brief Initialise la réception UART en interruption.
-     */
+    /* Initialisation */
     void UART_Init(void);
 
-    /**
-     * @brief Envoie une chaîne de caractères (mode bloquant).
-     * @param str La chaîne à envoyer (terminée par '\0').
-     */
-    void uart_send_raw(const char *str);
+    /* Fonctions d'envoi */
+    void UART_Send_Raw(const char *str);
+    void UART_Send_Bytes(const uint8_t *data, uint16_t length);
+    void UART_Encode_And_Send_Message(uint16_t msgFunction, uint16_t msgPayloadLength, const uint8_t *msgPayload);
 
-    /**
-     * @brief Envoie un buffer binaire (mode bloquant).
-     * @param data Pointeur vers les données.
-     * @param length Nombre d'octets à envoyer.
-     */
-    void uart_send_bytes(const uint8_t *data, uint16_t length);
+    /* Fonctions de décodage et de traitement des messages reçus */
+    void UART_Process_Data(void);
+    void UART_Decode_Message(uint8_t c);
+    void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, const uint8_t *payload);
 
-    /**
-     * @brief Traite les données reçues dans le tampon (à appeler périodiquement ou dans la callback).
-     */
-    void uart_process_data(void);
-
-    /**
-     * @brief Callback appelé par le HAL lorsqu'un octet est reçu.
-     */
-    void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
+    /* Callbacks HAL pour la gestion des interruptions UART */
+    void HAL_UART_RxCpltCallback(UART_HandleTypeDef *hUART);
+    void HAL_UART_TxCpltCallback(UART_HandleTypeDef *hUART);
 
 #ifdef __cplusplus
 }
