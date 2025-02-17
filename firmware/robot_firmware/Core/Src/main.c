@@ -152,6 +152,20 @@ static LCD_DrvTypeDef *LcdDrv;
 
 uint32_t I2c3Timeout = I2C3_TIMEOUT_MAX; /*<! Value of Timeout when I2C communication fails */
 uint32_t Spi5Timeout = SPI5_TIMEOUT_MAX; /*<! Value of Timeout when SPI communication fails */
+
+static void LED_Init(void)
+{
+  __HAL_RCC_GPIOG_CLK_ENABLE();
+
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = LED_GREEN_PIN | LED_RED_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_PORT, &GPIO_InitStruct);
+
+  HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN | LED_RED_PIN, GPIO_PIN_RESET);
+}
 /* USER CODE END 0 */
 
 /**
@@ -194,6 +208,7 @@ int main(void)
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
+  LED_Init();
   UART_Init();
   /* USER CODE END 2 */
 
@@ -831,8 +846,8 @@ static uint8_t I2C3_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint
   /* Check the communication status */
   if (status == HAL_OK)
   {
-    return 0;
-  }
+  return 0;
+}
   else
   {
     /* Re-Initialize the BUS */

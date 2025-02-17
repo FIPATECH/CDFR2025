@@ -1,25 +1,33 @@
 #include "uart_handler.h"
 #include "circular_buffer.h"
 #include "uart_commands.h"
+#include "main.h"
 #include <string.h>
 #include <stdlib.h>
 
+/* Utilisation de USART3 pour la communication */
 extern UART_HandleTypeDef huart3;
 
+/* Taille des buffers RX et TX */
 #define RX_BUFFER_SIZE 512
 #define TX_BUFFER_SIZE 512
 
+/* Buffers statiques pour RX et TX */
 static uint8_t rxArray[RX_BUFFER_SIZE];
 static uint8_t txArray[TX_BUFFER_SIZE];
 
+/* Instances de buffers circulaires */
 static CircularBuffer rxCB;
 static CircularBuffer txCB;
 
+/* Flag indiquant si une transmission est en cours */
 static volatile uint8_t isTransmitting = 0;
 
+/* Octet temporaire pour la réception et pour la transmission */
 static uint8_t rx_byte;
 static uint8_t tx_byte;
 
+/* États de réception */
 #define RCV_STATE_WAITING 0
 #define RCV_STATE_FUNCTION_MSB 1
 #define RCV_STATE_FUNCTION_LSB 2
@@ -28,6 +36,7 @@ static uint8_t tx_byte;
 #define RCV_STATE_PAYLOAD 5
 #define RCV_STATE_CHECKSUM 6
 
+/* Variables pour le décodage */
 static uint16_t msgDecodedFunction = 0;
 static uint16_t msgDecodedPayloadLength = 0;
 static uint8_t msgDecodedPayload[128];
@@ -69,17 +78,20 @@ void UART_Encode_And_Send_Message(uint16_t msgFunction, uint16_t msgPayloadLengt
     uint16_t totalLength = 1 + 2 + 2 + msgPayloadLength + 1;
     uint8_t msg[totalLength];
     uint16_t pos = 0;
+
     msg[pos++] = 0x4A;
     msg[pos++] = (uint8_t)(msgFunction >> 8);
     msg[pos++] = (uint8_t)(msgFunction & 0xFF);
     msg[pos++] = (uint8_t)(msgPayloadLength >> 8);
     msg[pos++] = (uint8_t)(msgPayloadLength & 0xFF);
+
     if (msgPayloadLength > 0 && msgPayload != NULL)
     {
         memcpy(&msg[pos], msgPayload, msgPayloadLength);
         pos += msgPayloadLength;
     }
     msg[pos++] = UART_Calculate_Checksum(msgFunction, msgPayloadLength, msgPayload);
+    
     UART_Send_Bytes(msg, totalLength);
 }
 
@@ -115,6 +127,8 @@ void UART_Send_Bytes(const uint8_t *data, uint16_t length)
     if (data == NULL || length == 0)
         return;
 
+    HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_SET); // LED Verte
+
     for (uint16_t i = 0; i < length; i++)
     {
         while (CircularBuffer_IsFull(&txCB))
@@ -141,6 +155,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     if (huart->Instance == USART3)
     {
+        HAL_GPIO_TogglePin(LED_PORT, LED_RED_PIN); // LED Rouge
+
         CircularBuffer_Put(&rxCB, rx_byte);
         HAL_UART_Receive_IT(&huart3, &rx_byte, 1);
     }
@@ -160,6 +176,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
         else
         {
             isTransmitting = 0;
+            HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_RESET);
         }
     }
 }
@@ -195,22 +212,27 @@ void UART_Decode_Message(uint8_t c)
             msgDecodedPayloadIndex = 0;
         }
         break;
+        
     case RCV_STATE_FUNCTION_MSB:
         msgDecodedFunction = c << 8;
         rcvState = RCV_STATE_FUNCTION_LSB;
         break;
+
     case RCV_STATE_FUNCTION_LSB:
         msgDecodedFunction |= c;
         rcvState = RCV_STATE_LENGTH_MSB;
         break;
+
     case RCV_STATE_LENGTH_MSB:
         msgDecodedPayloadLength = c << 8;
         rcvState = RCV_STATE_LENGTH_LSB;
         break;
+
     case RCV_STATE_LENGTH_LSB:
         msgDecodedPayloadLength |= c;
         rcvState = RCV_STATE_PAYLOAD;
         break;
+
     case RCV_STATE_PAYLOAD:
         if (msgDecodedPayloadIndex < sizeof(msgDecodedPayload))
         {
@@ -221,6 +243,7 @@ void UART_Decode_Message(uint8_t c)
             rcvState = RCV_STATE_CHECKSUM;
         }
         break;
+
     case RCV_STATE_CHECKSUM:
     {
         uint8_t calcChecksum = UART_Calculate_Checksum(msgDecodedFunction, msgDecodedPayloadLength, msgDecodedPayload);
@@ -231,6 +254,7 @@ void UART_Decode_Message(uint8_t c)
         rcvState = RCV_STATE_WAITING;
     }
     break;
+
     default:
         rcvState = RCV_STATE_WAITING;
         break;
