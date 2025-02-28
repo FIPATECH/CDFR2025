@@ -5,11 +5,11 @@
 #include <cstdint>
 #include <iomanip>
 #include <string>
-#include <cstdio> // Pour sprintf
+#include <cstdio>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <serial/serial.h>
-#include "uart_commands.h" // Doit définir, par exemple, UART_CMD_STRATEGY
+#include "uart_commands.h"
 
 using namespace std::chrono_literals;
 using Clock = std::chrono::steady_clock;
@@ -65,8 +65,12 @@ public:
         strategy_pub_ = this->create_publisher<std_msgs::msg::String>("/strategy", 10);
         timer_ = this->create_wall_timer(50ms, std::bind(&UARTBridgeNode::read_uart, this));
         timeout_timer_ = this->create_wall_timer(300ms, std::bind(&UARTBridgeNode::check_rx_timeout, this));
-        // Timer pour envoyer périodiquement une stratégie (exemple toutes les 5 secondes)
-        strategy_timer_ = this->create_wall_timer(5s, std::bind(&UARTBridgeNode::apply_strategy_callback, this));
+        // Timer pour envoyer périodiquement un PING (toutes les 5 secondes)
+        ping_timer_ = this->create_wall_timer(5s, std::bind(&UARTBridgeNode::send_ping_callback, this));
+        // Timer pour envoyer périodiquement le texte "Hello STM!" (toutes les 7 secondes)
+        text_timer_ = this->create_wall_timer(7s, std::bind(&UARTBridgeNode::send_hello_stm_callback, this));
+        // Timer pour envoyer périodiquement une stratégie (toutes les 10 secondes)
+        strategy_timer_ = this->create_wall_timer(10s, std::bind(&UARTBridgeNode::send_strategy_callback, this));
 
         last_byte_time_ = Clock::now();
     }
@@ -121,6 +125,35 @@ public:
         RCLCPP_INFO(this->get_logger(), "Message UART envoyé (Fonction=0x%04X, Taille=%u)", msg_function, total_length);
     }
 
+    // Envoi d'un PING
+    void send_ping_callback()
+    {
+        send_uart_message(UART_CMD_PING, {});
+        RCLCPP_INFO(this->get_logger(), "PING envoyé");
+    }
+
+    // Envoi du texte "Hello STM!" via la commande TEXT
+    void send_hello_stm_callback()
+    {
+        send_text("Hello STM!");
+        RCLCPP_INFO(this->get_logger(), "Texte 'Hello STM!' envoyé");
+    }
+
+    // Envoi d'une stratégie via la commande STRATEGY
+    void send_strategy_callback()
+    {
+        // Par exemple, envoyer une stratégie avec RED, ZONE_A, ZONE_B
+        apply_strategy(RED, ZONE_A, ZONE_B);
+        RCLCPP_INFO(this->get_logger(), "STRATEGY envoyé");
+    }
+
+    // Envoi d'un message texte
+    void send_text(const std::string &text)
+    {
+        std::vector<uint8_t> payload(text.begin(), text.end());
+        send_uart_message(UART_CMD_TEXT, payload);
+    }
+
     // Méthode inspirée d'Apply_Strategy côté STM32
     void apply_strategy(Color teamColor, Zone teamZone, Zone enemyZone)
     {
@@ -143,6 +176,8 @@ private:
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr strategy_pub_;
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::TimerBase::SharedPtr timeout_timer_;
+    rclcpp::TimerBase::SharedPtr ping_timer_;
+    rclcpp::TimerBase::SharedPtr text_timer_;
     rclcpp::TimerBase::SharedPtr strategy_timer_;
 
     // Protocole
@@ -245,7 +280,15 @@ private:
             break;
         case RcvState::LENGTH_LSB:
             msg_payload_length_ |= byte;
-            rcv_state_ = RcvState::PAYLOAD;
+            // Si le payload est de longueur zéro, passer directement à CHECKSUM
+            if (msg_payload_length_ == 0)
+            {
+                rcv_state_ = RcvState::CHECKSUM;
+            }
+            else
+            {
+                rcv_state_ = RcvState::PAYLOAD;
+            }
             RCLCPP_DEBUG(this->get_logger(), "Fonction=0x%04X, Longueur payload=%u", msg_function_, msg_payload_length_);
             break;
         case RcvState::PAYLOAD:
@@ -280,25 +323,38 @@ private:
     void process_message(uint16_t function, const std::vector<uint8_t> &payload)
     {
         RCLCPP_INFO(this->get_logger(), "Message décodé: Fonction=0x%04X, Taille payload=%zu", function, payload.size());
-        if (function == UART_CMD_STRATEGY)
+        switch (function)
+        {
+        case UART_CMD_STRATEGY:
         {
             std::string strategy_msg(payload.begin(), payload.end());
             RCLCPP_INFO(this->get_logger(), "STRATEGY reçue: %s", strategy_msg.c_str());
             auto msg = std_msgs::msg::String();
             msg.data = strategy_msg;
             strategy_pub_->publish(msg);
+            break;
         }
-        else
+        case UART_CMD_PING:
         {
-            RCLCPP_WARN(this->get_logger(), "Commande inconnue reçue: 0x%04X", function);
+            RCLCPP_INFO(this->get_logger(), "PING reçu");
+            send_uart_message(UART_CMD_PONG, {}); // Répondre par un PONG
+            break;
         }
-    }
-
-    // Callback du timer pour envoyer périodiquement une stratégie
-    void apply_strategy_callback()
-    {
-        // Exemple : envoyer une stratégie avec teamColor=RED, teamZone=ZONE_A et enemyZone=ZONE_B
-        apply_strategy(RED, ZONE_A, ZONE_B);
+        case UART_CMD_PONG:
+        {
+            RCLCPP_INFO(this->get_logger(), "PONG reçu");
+            break;
+        }
+        case UART_CMD_TEXT:
+        {
+            std::string text(payload.begin(), payload.end());
+            RCLCPP_INFO(this->get_logger(), "Texte reçu: %s", text.c_str());
+            break;
+        }
+        default:
+            RCLCPP_WARN(this->get_logger(), "Commande inconnue reçue: 0x%04X", function);
+            break;
+        }
     }
 };
 

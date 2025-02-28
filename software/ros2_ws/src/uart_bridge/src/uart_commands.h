@@ -2,5 +2,8 @@
 #define UART_COMMANDS_H
 
 #define UART_CMD_STRATEGY 0x0001
+#define UART_CMD_TEXT 0x0002
+#define UART_CMD_PING 0x0003
+#define UART_CMD_PONG 0x0004
 
 #endif /* UART_COMMANDS_H */
