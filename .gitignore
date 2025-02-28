@@ -21,3 +21,7 @@ firmware/robot_firmware/STM32CubeIDE/Debug/
 *.pdb
 
 software/server/node_modules/
+
+software/ros2_ws/install/
+software/ros2_ws/build/
+software/ros2_ws/log/
