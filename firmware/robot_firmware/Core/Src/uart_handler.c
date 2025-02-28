@@ -121,6 +121,17 @@ void UART_Send_Raw(const char *str)
 }
 
 /**
+ * @brief Envoie une chaîne de caractères encodée via UART.
+ */
+void UART_Send_Text(const char *text)
+{
+    if (text == NULL)
+        return;
+    uint16_t len = (uint16_t)strlen(text);
+    UART_Encode_And_Send_Message(UART_CMD_TEXT, len, (const uint8_t *)text);
+}
+
+/**
  * @brief Envoie un buffer de données via UART en utilisant le buffer circulaire TX.
  */
 void UART_Send_Bytes(const uint8_t *data, uint16_t length)
@@ -231,7 +242,15 @@ void UART_Decode_Message(uint8_t c)
 
     case RCV_STATE_LENGTH_LSB:
         msgDecodedPayloadLength |= c;
-        rcvState = RCV_STATE_PAYLOAD;
+        // Si le payload est de longueur zéro, on passe directement à l'état CHECKSUM
+        if (msgDecodedPayloadLength == 0)
+        {
+            rcvState = RCV_STATE_CHECKSUM;
+        }
+        else
+        {
+            rcvState = RCV_STATE_PAYLOAD;
+        }
         break;
 
     case RCV_STATE_PAYLOAD:
@@ -271,36 +290,31 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
     {
     case UART_CMD_STRATEGY:
         Apply_Strategy(1, 1, 1);
-        
-        // Test de réception
+        break;
+
+    case UART_CMD_PING:
+        UART_Encode_And_Send_Message(UART_CMD_PONG, 0, NULL);
+        break;
+
+    case UART_CMD_PONG:
+        // Test de réception du ping
         // HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_SET);
         // HAL_Delay(1000);
         // HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_RESET);
         break;
 
-        // case UART_ID_START_MATCH:
-        //     // startMatch(); // Début du match côté ROS2
-        //     break;
-
-        // case UART_ID_OPEN_GRIPPER:
-        //     // openGripper(); // Fonction pour ouvrir la pince
-        //     break;
-
-        // case UART_ID_CLOSE_GRIPPER:
-        //     // closeGripper(); // Fonction pour fermer la pince
-        //     break;
-
-        // case UART_ID_RAISE_ARM:
-        //     // raiseArm(); // Fonction pour lever le bras
-        //     break;
-
-        // case UART_ID_LOWER_ARM:
-        //     // lowerArm(); // Fonction pour abaisser le bras
-        //     break;
-
-        // case UART_ID_STOP_MOTORS:
-        //     // stopMotors(); // Fonction pour arrêter les moteurs
-        //     break;
+    case UART_CMD_TEXT:
+        if (payloadLength > 0)
+        {
+            char text[128] = {0};
+            memcpy(text, payload, (payloadLength < sizeof(text) - 1) ? payloadLength : sizeof(text) - 1);
+            // Vérifier si le texte est "Hello STM!"
+            if (strcmp(text, "Hello STM!") == 0)
+            {
+                HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_SET);
+            }
+        }
+        break;
 
     default:
         break;

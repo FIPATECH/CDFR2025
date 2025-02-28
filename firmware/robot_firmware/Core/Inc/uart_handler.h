@@ -14,6 +14,7 @@ extern "C"
 
     /* Fonctions d'envoi */
     void UART_Send_Raw(const char *str);
+    void UART_Send_Text(const char *text);
     void UART_Send_Bytes(const uint8_t *data, uint16_t length);
     void UART_Encode_And_Send_Message(uint16_t msgFunction, uint16_t msgPayloadLength, const uint8_t *msgPayload);
 

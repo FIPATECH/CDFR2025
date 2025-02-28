@@ -1002,6 +1002,7 @@ void StartDefaultTask(void *argument)
   for (;;)
   {
     // UART_Send_Raw("Hello Jetson!\r\n");
+    // UART_Send_Text("Hello Jetson!");
     osDelay(100);
   }
   /* USER CODE END 5 */
