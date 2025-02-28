@@ -4,6 +4,7 @@
 #include "main.h"
 #include <string.h>
 #include <stdlib.h>
+#include "strategy_manager.h"
 
 /* Utilisation de USART3 pour la communication */
 extern UART_HandleTypeDef huart3;
@@ -91,7 +92,7 @@ void UART_Encode_And_Send_Message(uint16_t msgFunction, uint16_t msgPayloadLengt
         pos += msgPayloadLength;
     }
     msg[pos++] = UART_Calculate_Checksum(msgFunction, msgPayloadLength, msgPayload);
-    
+
     UART_Send_Bytes(msg, totalLength);
 }
 
@@ -212,7 +213,7 @@ void UART_Decode_Message(uint8_t c)
             msgDecodedPayloadIndex = 0;
         }
         break;
-        
+
     case RCV_STATE_FUNCTION_MSB:
         msgDecodedFunction = c << 8;
         rcvState = RCV_STATE_FUNCTION_LSB;
@@ -266,34 +267,42 @@ void UART_Decode_Message(uint8_t c)
  */
 void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, const uint8_t *payload)
 {
-    // switch (function)
-    // {
-    // case UART_ID_START_MATCH:
-    //     // startMatch(); // Début du match côté ROS2
-    //     break;
+    switch (function)
+    {
+    case UART_CMD_STRATEGY:
+        Apply_Strategy(1, 1, 1);
+        
+        // Test de réception
+        // HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_SET);
+        // HAL_Delay(1000);
+        // HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_RESET);
+        break;
 
-    // case UART_ID_OPEN_GRIPPER:
-    //     // openGripper(); // Fonction pour ouvrir la pince
-    //     break;
+        // case UART_ID_START_MATCH:
+        //     // startMatch(); // Début du match côté ROS2
+        //     break;
 
-    // case UART_ID_CLOSE_GRIPPER:
-    //     // closeGripper(); // Fonction pour fermer la pince
-    //     break;
+        // case UART_ID_OPEN_GRIPPER:
+        //     // openGripper(); // Fonction pour ouvrir la pince
+        //     break;
 
-    // case UART_ID_RAISE_ARM:
-    //     // raiseArm(); // Fonction pour lever le bras
-    //     break;
+        // case UART_ID_CLOSE_GRIPPER:
+        //     // closeGripper(); // Fonction pour fermer la pince
+        //     break;
 
-    // case UART_ID_LOWER_ARM:
-    //     // lowerArm(); // Fonction pour abaisser le bras
-    //     break;
+        // case UART_ID_RAISE_ARM:
+        //     // raiseArm(); // Fonction pour lever le bras
+        //     break;
 
-    // case UART_ID_STOP_MOTORS:
-    //     // stopMotors(); // Fonction pour arrêter les moteurs
-    //     break;
+        // case UART_ID_LOWER_ARM:
+        //     // lowerArm(); // Fonction pour abaisser le bras
+        //     break;
 
-    // default:
-    //     printf("Commande inconnue reçue : 0x%04X\n", function);
-    //     break;
-    // }
+        // case UART_ID_STOP_MOTORS:
+        //     // stopMotors(); // Fonction pour arrêter les moteurs
+        //     break;
+
+    default:
+        break;
+    }
 }

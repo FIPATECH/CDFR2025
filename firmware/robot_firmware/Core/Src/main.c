@@ -846,8 +846,8 @@ static uint8_t I2C3_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint
   /* Check the communication status */
   if (status == HAL_OK)
   {
-  return 0;
-}
+    return 0;
+  }
   else
   {
     /* Re-Initialize the BUS */
@@ -1001,8 +1001,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    UART_Send_Raw("Hello Jetson!\r\n");
-    osDelay(1000);
+    // UART_Send_Raw("Hello Jetson!\r\n");
+    osDelay(100);
   }
   /* USER CODE END 5 */
 }
