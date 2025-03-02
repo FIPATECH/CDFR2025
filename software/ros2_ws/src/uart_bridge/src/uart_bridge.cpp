@@ -63,6 +63,20 @@ public:
         }
 
         strategy_pub_ = this->create_publisher<std_msgs::msg::String>("/strategy", 10);
+        // Publisher pour relayer START_MATCH vers le noeud match_control
+        match_trigger_pub_ = this->create_publisher<std_msgs::msg::String>("/match_trigger", 10);
+        // Subscriber pour recevoir STOP_MATCH depuis match_control
+        match_command_sub_ = this->create_subscription<std_msgs::msg::String>(
+            "/match_command", 10,
+            [this](const std_msgs::msg::String::SharedPtr msg)
+            {
+                if (msg->data == "STOP_MATCH") // Fin du chrono
+                {
+                    RCLCPP_INFO(this->get_logger(), "STOP_MATCH reçu du topic, envoi à STM32");
+                    send_uart_message(UART_CMD_STOP_MATCH, {});
+                }
+            });
+
         timer_ = this->create_wall_timer(50ms, std::bind(&UARTBridgeNode::read_uart, this));
         timeout_timer_ = this->create_wall_timer(300ms, std::bind(&UARTBridgeNode::check_rx_timeout, this));
         // Timer pour envoyer périodiquement un PING (toutes les 5 secondes)
@@ -165,15 +179,18 @@ public:
         char msg[50];
         int length = std::sprintf(msg, "STRATEGY:%d:%d:%d", strat.color, strat.teamzone, strat.enemyzone);
 
-        // Conversion de la chaîne en vecteur d'octets
         std::vector<uint8_t> payload(msg, msg + length);
-
         send_uart_message(UART_CMD_STRATEGY, payload);
     }
 
 private:
     serial::Serial serial_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr strategy_pub_;
+    // Publisher pour transmettre la réception de START_MATCH à match_control
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr match_trigger_pub_;
+    // Subscriber pour recevoir STOP_MATCH depuis match_control
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr match_command_sub_;
+
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::TimerBase::SharedPtr timeout_timer_;
     rclcpp::TimerBase::SharedPtr ping_timer_;
@@ -349,6 +366,14 @@ private:
         {
             std::string text(payload.begin(), payload.end());
             RCLCPP_INFO(this->get_logger(), "Texte reçu: %s", text.c_str());
+            break;
+        }
+        case UART_CMD_START_MATCH:
+        {
+            RCLCPP_INFO(this->get_logger(), "START_MATCH reçu");
+            auto msg = std_msgs::msg::String();
+            msg.data = "START_MATCH";
+            match_trigger_pub_->publish(msg);
             break;
         }
         default:
