@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "strategy_manager.h"
+#include "match_trigger.h"
 
 /* Utilisation de USART3 pour la communication */
 extern UART_HandleTypeDef huart3;
@@ -106,7 +107,7 @@ void UART_Init(void)
 
     isTransmitting = 0;
 
-    /* Démarrage de la réception d'un octet en mode interruption */
+    // Démarrage de la réception d'un octet en mode interruption
     HAL_UART_Receive_IT(&huart3, &rx_byte, 1);
 }
 
@@ -242,7 +243,6 @@ void UART_Decode_Message(uint8_t c)
 
     case RCV_STATE_LENGTH_LSB:
         msgDecodedPayloadLength |= c;
-        // Si le payload est de longueur zéro, on passe directement à l'état CHECKSUM
         if (msgDecodedPayloadLength == 0)
         {
             rcvState = RCV_STATE_CHECKSUM;
@@ -282,6 +282,21 @@ void UART_Decode_Message(uint8_t c)
 }
 
 /**
+ * @brief Tâche FreeRTOS dédiée au traitement des données reçues par UART.
+ * Elle appelle régulièrement la fonction UART_Process_Data() qui décode
+ * les trames reçues (basées sur une machine à états) à partir du buffer RX.
+ */
+void UART_Task(void *argument)
+{
+    /* Infinite loop */
+    for (;;)
+    {
+        UART_Process_Data();
+        osDelay(10);
+    }
+}
+
+/**
  * @brief Traite la trame décodée en fonction de son identifiant.
  */
 void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, const uint8_t *payload)
@@ -289,7 +304,7 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
     switch (function)
     {
     case UART_CMD_STRATEGY:
-        Apply_Strategy(1, 1, 1);
+        // Apply_Strategy(1, 1, 1);
         break;
 
     case UART_CMD_PING:
@@ -308,12 +323,16 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
         {
             char text[128] = {0};
             memcpy(text, payload, (payloadLength < sizeof(text) - 1) ? payloadLength : sizeof(text) - 1);
-            // Vérifier si le texte est "Hello STM!"
             if (strcmp(text, "Hello STM!") == 0)
             {
                 HAL_GPIO_WritePin(LED_PORT, LED_GREEN_PIN, GPIO_PIN_SET);
             }
         }
+        break;
+
+    case UART_CMD_STOP_MATCH:
+        // Signaler la fin du match
+        MatchTrigger_StopCallback();
         break;
 
     default:

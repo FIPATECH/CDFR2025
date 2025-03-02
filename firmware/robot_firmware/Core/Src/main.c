@@ -26,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "Components/ili9341/ili9341.h"
 #include "uart_handler.h"
+#include "match_trigger.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -98,6 +99,13 @@ const osThreadAttr_t UART_Task_attributes = {
     .name = "UART_Task",
     .stack_size = 512 * 4,
     .priority = (osPriority_t)osPriorityAboveNormal,
+};
+/* Definitions for MatchTriggerTask */
+osThreadId_t MatchTriggerTaskHandle;
+const osThreadAttr_t MatchTriggerTask_attributes = {
+    .name = "MatchTriggerTask",
+    .stack_size = 256 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
 };
 /* USER CODE END PV */
 
@@ -240,7 +248,7 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_THREADS */
   UART_TaskHandle = osThreadNew(UART_Task, NULL, &UART_Task_attributes);
-  /* add threads, ... */
+  MatchTriggerTaskHandle = osThreadNew(MatchTriggerTask, NULL, &MatchTriggerTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -652,12 +660,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : USER_BTN_Pin */
+  GPIO_InitStruct.Pin = USER_BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(USER_BTN_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PD12 PD13 */
   GPIO_InitStruct.Pin = GPIO_PIN_12 | GPIO_PIN_13;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
   /* USER CODE END MX_GPIO_Init_2 */
@@ -1006,22 +1024,6 @@ void StartDefaultTask(void *argument)
     osDelay(100);
   }
   /* USER CODE END 5 */
-}
-
-/**
- * @brief  Tâche UART
- * Cette tâche est dédiée au traitement des données reçues par UART.
- * Elle appelle régulièrement la fonction UART_Process_Data() qui décode
- * les trames reçues (basées sur une machine à états) à partir du buffer RX.
- */
-void UART_Task(void *argument)
-{
-  /* Infinite loop */
-  for (;;)
-  {
-    UART_Process_Data();
-    osDelay(10);
-  }
 }
 
 /**
