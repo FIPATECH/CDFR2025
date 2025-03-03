@@ -2,3 +2,7 @@
 	path = software/ros2_ws/src/rplidar_ros2
 	url = https://github.com/FIPATECH/rplidar_ros2
 	branch = submodule
+[submodule "software/ros2_ws/src/imu_fusion"]
+	path = software/ros2_ws/src/imu_fusion
+	url = https://github.com/FIPATECH/imu_fusion.git
+	branch = submodule
