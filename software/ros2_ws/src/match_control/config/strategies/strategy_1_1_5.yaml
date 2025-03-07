@@ -1,0 +1,6 @@
+id: "1:1:5"
+name: "FIPATECH: YELLOW -> CENTER_RIGHT / ENNEMY: BLEU -> BOTTOM_RIGHT"
+team_color: "1"
+team_zone: "1"
+enemy_zone: "5"
+waypoints: []

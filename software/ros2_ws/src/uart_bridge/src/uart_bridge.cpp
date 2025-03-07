@@ -14,30 +14,10 @@
 using namespace std::chrono_literals;
 using Clock = std::chrono::steady_clock;
 
-// Pour l'exemple, définition d'énumérations et structure pour la stratégie
-enum Color
-{
-    RED = 0,
-    BLUE = 1
-};
-enum Zone
-{
-    ZONE_A = 0,
-    ZONE_B = 1,
-    ZONE_C = 2
-};
-
-struct Strategy
-{
-    int color;
-    int teamzone;
-    int enemyzone;
-};
-
 class UARTBridgeNode : public rclcpp::Node
 {
 public:
-    UARTBridgeNode() : Node("uart_bridge_node_cpp")
+    UARTBridgeNode() : Node("uart_bridge_node")
     {
         try
         {
@@ -83,8 +63,6 @@ public:
         ping_timer_ = this->create_wall_timer(5s, std::bind(&UARTBridgeNode::send_ping_callback, this));
         // Timer pour envoyer périodiquement le texte "Hello STM!" (toutes les 7 secondes)
         text_timer_ = this->create_wall_timer(7s, std::bind(&UARTBridgeNode::send_hello_stm_callback, this));
-        // Timer pour envoyer périodiquement une stratégie (toutes les 10 secondes)
-        strategy_timer_ = this->create_wall_timer(10s, std::bind(&UARTBridgeNode::send_strategy_callback, this));
 
         last_byte_time_ = Clock::now();
     }
@@ -153,34 +131,11 @@ public:
         RCLCPP_INFO(this->get_logger(), "Texte 'Hello STM!' envoyé");
     }
 
-    // Envoi d'une stratégie via la commande STRATEGY
-    void send_strategy_callback()
-    {
-        // Par exemple, envoyer une stratégie avec RED, ZONE_A, ZONE_B
-        apply_strategy(RED, ZONE_A, ZONE_B);
-        RCLCPP_INFO(this->get_logger(), "STRATEGY envoyé");
-    }
-
     // Envoi d'un message texte
     void send_text(const std::string &text)
     {
         std::vector<uint8_t> payload(text.begin(), text.end());
         send_uart_message(UART_CMD_TEXT, payload);
-    }
-
-    // Méthode inspirée d'Apply_Strategy côté STM32
-    void apply_strategy(Color teamColor, Zone teamZone, Zone enemyZone)
-    {
-        Strategy strat;
-        strat.color = teamColor;
-        strat.teamzone = teamZone;
-        strat.enemyzone = enemyZone;
-
-        char msg[50];
-        int length = std::sprintf(msg, "STRATEGY:%d:%d:%d", strat.color, strat.teamzone, strat.enemyzone);
-
-        std::vector<uint8_t> payload(msg, msg + length);
-        send_uart_message(UART_CMD_STRATEGY, payload);
     }
 
 private:
@@ -195,7 +150,6 @@ private:
     rclcpp::TimerBase::SharedPtr timeout_timer_;
     rclcpp::TimerBase::SharedPtr ping_timer_;
     rclcpp::TimerBase::SharedPtr text_timer_;
-    rclcpp::TimerBase::SharedPtr strategy_timer_;
 
     // Protocole
     const uint8_t HEADER = 0x4A;
@@ -251,7 +205,7 @@ private:
                     << static_cast<int>(byte) << " ";
                 process_byte(byte);
             }
-            RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
+            // RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
             last_byte_time_ = Clock::now();
         }
     }
@@ -297,16 +251,8 @@ private:
             break;
         case RcvState::LENGTH_LSB:
             msg_payload_length_ |= byte;
-            // Si le payload est de longueur zéro, passer directement à CHECKSUM
-            if (msg_payload_length_ == 0)
-            {
-                rcv_state_ = RcvState::CHECKSUM;
-            }
-            else
-            {
-                rcv_state_ = RcvState::PAYLOAD;
-            }
-            RCLCPP_DEBUG(this->get_logger(), "Fonction=0x%04X, Longueur payload=%u", msg_function_, msg_payload_length_);
+            rcv_state_ = (msg_payload_length_ == 0) ? RcvState::CHECKSUM : RcvState::PAYLOAD;
+            // RCLCPP_DEBUG(this->get_logger(), "Fonction=0x%04X, Longueur payload=%u", msg_function_, msg_payload_length_);
             break;
         case RcvState::PAYLOAD:
             msg_payload_.push_back(byte);
@@ -318,7 +264,7 @@ private:
         case RcvState::CHECKSUM:
         {
             uint8_t computed_checksum = calculate_checksum_direct();
-            RCLCPP_DEBUG(this->get_logger(), "Checksum calculé=0x%02X, Reçu=0x%02X", computed_checksum, byte);
+            // RCLCPP_DEBUG(this->get_logger(), "Checksum calculé=0x%02X, Reçu=0x%02X", computed_checksum, byte);
             if (computed_checksum == byte)
             {
                 process_message(msg_function_, msg_payload_);
