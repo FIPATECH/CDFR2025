@@ -30,7 +30,6 @@ public:
         catch (serial::IOException &e)
         {
             RCLCPP_ERROR(this->get_logger(), "Impossible d'ouvrir le port série /dev/ttyTHS1");
-            return;
         }
         if (serial_.isOpen())
         {
@@ -39,13 +38,10 @@ public:
         else
         {
             RCLCPP_ERROR(this->get_logger(), "Port série /dev/ttyTHS1 non ouvert");
-            return;
         }
 
         strategy_pub_ = this->create_publisher<std_msgs::msg::String>("/strategy", 10);
-        // Publisher pour relayer START_MATCH vers le noeud match_control
         match_trigger_pub_ = this->create_publisher<std_msgs::msg::String>("/match_trigger", 10);
-        // Subscriber pour recevoir STOP_MATCH depuis match_control
         match_command_sub_ = this->create_subscription<std_msgs::msg::String>(
             "/match_command", 10,
             [this](const std_msgs::msg::String::SharedPtr msg)
@@ -59,10 +55,9 @@ public:
 
         timer_ = this->create_wall_timer(50ms, std::bind(&UARTBridgeNode::read_uart, this));
         timeout_timer_ = this->create_wall_timer(300ms, std::bind(&UARTBridgeNode::check_rx_timeout, this));
-        // Timer pour envoyer périodiquement un PING (toutes les 5 secondes)
         ping_timer_ = this->create_wall_timer(5s, std::bind(&UARTBridgeNode::send_ping_callback, this));
-        // Timer pour envoyer périodiquement le texte "Hello STM!" (toutes les 7 secondes)
         text_timer_ = this->create_wall_timer(7s, std::bind(&UARTBridgeNode::send_hello_stm_callback, this));
+        reconnect_timer_ = this->create_wall_timer(1s, std::bind(&UARTBridgeNode::attempt_serial_reconnect, this));
 
         last_byte_time_ = Clock::now();
     }
@@ -83,24 +78,18 @@ public:
         std::vector<uint8_t> message(total_length);
         uint16_t pos = 0;
 
-        // En-tête
+        // Construction de la trame
         message[pos++] = HEADER;
-
-        // Fonction (MSB puis LSB)
         message[pos++] = (msg_function >> 8) & 0xFF;
         message[pos++] = msg_function & 0xFF;
-
-        // Longueur du payload (MSB puis LSB)
         message[pos++] = (payload_length >> 8) & 0xFF;
         message[pos++] = payload_length & 0xFF;
-
-        // Payload
         for (auto byte : payload)
         {
             message[pos++] = byte;
         }
 
-        // Calcul du checksum (initialisé par HEADER puis XOR sur tous les octets)
+        // Calcul du checksum
         uint8_t checksum = HEADER;
         checksum ^= (msg_function >> 8) & 0xFF;
         checksum ^= (msg_function & 0xFF);
@@ -113,25 +102,33 @@ public:
         message[pos++] = checksum;
 
         // Envoi via UART
-        serial_.write(message);
-        RCLCPP_INFO(this->get_logger(), "Message UART envoyé (Fonction=0x%04X, Taille=%u)", msg_function, total_length);
+        try
+        {
+            serial_.write(message);
+            RCLCPP_INFO(this->get_logger(), "Message UART envoyé (Fonction=0x%04X, Taille=%u)", msg_function, total_length);
+        }
+        catch (serial::IOException &e)
+        {
+            RCLCPP_ERROR(this->get_logger(), "Erreur lors de l'envoi: %s", e.what());
+            if (serial_.isOpen())
+            {
+                serial_.close();
+            }
+        }
     }
 
-    // Envoi d'un PING
     void send_ping_callback()
     {
         send_uart_message(UART_CMD_PING, {});
         RCLCPP_INFO(this->get_logger(), "PING envoyé");
     }
 
-    // Envoi du texte "Hello STM!" via la commande TEXT
     void send_hello_stm_callback()
     {
         send_text("Hello STM!");
         RCLCPP_INFO(this->get_logger(), "Texte 'Hello STM!' envoyé");
     }
 
-    // Envoi d'un message texte
     void send_text(const std::string &text)
     {
         std::vector<uint8_t> payload(text.begin(), text.end());
@@ -140,18 +137,17 @@ public:
 
 private:
     serial::Serial serial_;
+
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr strategy_pub_;
-    // Publisher pour transmettre la réception de START_MATCH à match_control
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr match_trigger_pub_;
-    // Subscriber pour recevoir STOP_MATCH depuis match_control
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr match_command_sub_;
 
     rclcpp::TimerBase::SharedPtr timer_;
     rclcpp::TimerBase::SharedPtr timeout_timer_;
     rclcpp::TimerBase::SharedPtr ping_timer_;
     rclcpp::TimerBase::SharedPtr text_timer_;
+    rclcpp::TimerBase::SharedPtr reconnect_timer_;
 
-    // Protocole
     const uint8_t HEADER = 0x4A;
 
     // Machine à états pour le décodage
@@ -170,10 +166,8 @@ private:
     uint16_t msg_payload_length_ = 0;
     std::vector<uint8_t> msg_payload_;
 
-    // Temps du dernier octet reçu
     Clock::time_point last_byte_time_;
 
-    // Calcul du checksum
     uint8_t calculate_checksum_direct()
     {
         uint8_t checksum = HEADER;
@@ -188,29 +182,38 @@ private:
         return checksum;
     }
 
-    // Lecture des données disponibles sur le port série
     void read_uart()
     {
-        if (serial_.available())
+        try
         {
-            std::vector<uint8_t> buffer;
-            size_t available_bytes = serial_.available();
-            serial_.read(buffer, available_bytes);
-
-            std::ostringstream oss;
-            oss << "Octets reçus (" << available_bytes << "): ";
-            for (auto byte : buffer)
+            if (serial_.available())
             {
-                oss << "0x" << std::hex << std::setw(2) << std::setfill('0')
-                    << static_cast<int>(byte) << " ";
-                process_byte(byte);
+                std::vector<uint8_t> buffer;
+                size_t available_bytes = serial_.available();
+                serial_.read(buffer, available_bytes);
+
+                std::ostringstream oss;
+                oss << "Octets reçus (" << available_bytes << "): ";
+                for (auto byte : buffer)
+                {
+                    oss << "0x" << std::hex << std::setw(2) << std::setfill('0')
+                        << static_cast<int>(byte) << " ";
+                    process_byte(byte);
+                }
+                // RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
+                last_byte_time_ = Clock::now();
             }
-            // RCLCPP_INFO(this->get_logger(), "%s", oss.str().c_str());
-            last_byte_time_ = Clock::now();
+        }
+        catch (serial::IOException &e)
+        {
+            RCLCPP_ERROR(this->get_logger(), "Erreur de lecture UART: %s", e.what());
+            if (serial_.isOpen())
+            {
+                serial_.close();
+            }
         }
     }
 
-    // Vérifie le timeout de réception (300ms sans octet)
     void check_rx_timeout()
     {
         auto now = Clock::now();
@@ -300,7 +303,7 @@ private:
         case UART_CMD_PING:
         {
             RCLCPP_INFO(this->get_logger(), "PING reçu");
-            send_uart_message(UART_CMD_PONG, {}); // Répondre par un PONG
+            send_uart_message(UART_CMD_PONG, {});
             break;
         }
         case UART_CMD_PONG:
@@ -325,6 +328,26 @@ private:
         default:
             RCLCPP_WARN(this->get_logger(), "Commande inconnue reçue: 0x%04X", function);
             break;
+        }
+    }
+
+    // Fonction de reconnexion du port
+    void attempt_serial_reconnect()
+    {
+        if (!serial_.isOpen())
+        {
+            try
+            {
+                serial_.open();
+                if (serial_.isOpen())
+                {
+                    RCLCPP_INFO(this->get_logger(), "Reconnexion réussie au port série");
+                }
+            }
+            catch (serial::IOException &e)
+            {
+                RCLCPP_WARN(this->get_logger(), "Tentative de reconnexion échouée : %s", e.what());
+            }
         }
     }
 };
