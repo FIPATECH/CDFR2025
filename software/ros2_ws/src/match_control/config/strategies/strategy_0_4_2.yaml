@@ -3,4 +3,28 @@ name: "FIPATECH: BLUE -> CENTER_LEFT / ENNEMY: YELLOW -> BOTTOM_LEFT"
 team_color: "0"
 team_zone: "4"
 enemy_zone: "2"
-waypoints: []
+waypoints:
+  - x: 150.0
+    y: 600.0
+    action: "MOVE"
+  - x: 150.0
+    y: 600.0
+    action: "OPEN_GRIPPER"
+  - x: 800.0
+    y: 600.0
+    action: "MOVE"
+  - x: 800.0
+    y: 600.0
+    action: "RAISE_ARM"
+  - x: 1200.0
+    y: 400.0
+    action: "MOVE"
+  - x: 1200.0
+    y: 400.0
+    action: "LOWER_ARM"
+  - x: 1200.0
+    y: 400.0
+    action: "RELEASE"
+  - x: 300.0
+    y: 300.0
+    action: "MOVE"

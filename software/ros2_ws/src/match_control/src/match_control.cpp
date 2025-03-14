@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <exception>
+#include <thread>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <yaml-cpp/yaml.h>
@@ -59,6 +60,7 @@ std::string build_strategy_filepath(const std::string &strategy_msg)
     std::istringstream iss(strategy_msg);
     std::string token, team_color, team_zone, enemy_zone;
 
+    // Découpage de la trame
     std::getline(iss, token, ':');
     std::getline(iss, team_color, ':');
     std::getline(iss, team_zone, ':');
@@ -76,18 +78,21 @@ class MatchControlNode : public rclcpp::Node
 public:
     MatchControlNode() : Node("match_control_node")
     {
-        // Abonnement pour recevoir START_MATCH sur le topic /match_trigger
+        // Souscription au topic /match_trigger pour recevoir "START_MATCH"
         match_trigger_subscriber_ = this->create_subscription<std_msgs::msg::String>(
             "/match_trigger", 10,
             std::bind(&MatchControlNode::match_trigger_callback, this, std::placeholders::_1));
 
-        // Abonnement pour recevoir la trame STRATEGY sur le topic /strategy
+        // Souscription au topic /strategy pour recevoir la trame de stratégie
         strategy_subscriber_ = this->create_subscription<std_msgs::msg::String>(
             "/strategy", 10,
             std::bind(&MatchControlNode::strategy_callback, this, std::placeholders::_1));
 
-        // Publisher pour envoyer STOP_MATCH sur le topic /match_command
+        // Publisher pour envoyer STOP_MATCH sur /match_command à la fin du match
         match_command_publisher_ = this->create_publisher<std_msgs::msg::String>("/match_command", 10);
+
+        // Publisher pour envoyer des commandes d'action vers la STM32
+        action_command_publisher_ = this->create_publisher<std_msgs::msg::String>("/action_command", 10);
 
         RCLCPP_INFO(this->get_logger(), "MatchControlNode démarré");
     }
@@ -96,26 +101,29 @@ private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr match_trigger_subscriber_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr strategy_subscriber_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr match_command_publisher_;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr action_command_publisher_;
     rclcpp::TimerBase::SharedPtr match_timer_;
-    
+
     const std::chrono::seconds match_duration_{100};
     Strategy current_strategy_;
 
-    // Callback pour START_MATCH
+    // Callback pour la réception de START_MATCH
     void match_trigger_callback(const std_msgs::msg::String::SharedPtr msg)
     {
         if (msg->data == "START_MATCH")
         {
-            RCLCPP_INFO(this->get_logger(), "START_MATCH reçu : démarrage du chronomètre pour %ld secondes", match_duration_.count());
+            RCLCPP_INFO(this->get_logger(), "START_MATCH reçu : démarrage du match pour %ld secondes", match_duration_.count());
+            // Démarrer le timer du match
             match_timer_ = this->create_wall_timer(
                 match_duration_,
                 std::bind(&MatchControlNode::match_timer_callback, this));
-
-            // Lancer l'exécution de la stratégie chargée
+            // Exécuter la stratégie dans un thread séparé
+            std::thread strategy_thread(&MatchControlNode::execute_strategy, this, current_strategy_);
+            strategy_thread.detach();
         }
     }
 
-    // Callback pour la trame STRATEGY
+    // Callback pour la réception de la trame STRATEGY
     void strategy_callback(const std_msgs::msg::String::SharedPtr msg)
     {
         std::string filepath = build_strategy_filepath(msg->data);
@@ -123,11 +131,36 @@ private:
         {
             current_strategy_ = load_strategy_from_file(filepath);
             RCLCPP_INFO(this->get_logger(), "Stratégie chargée : %s", current_strategy_.name.c_str());
+            // Afficher les waypoints et les actions
+            for (const auto &wp : current_strategy_.waypoints)
+            {
+                RCLCPP_INFO(this->get_logger(), "Waypoint: x=%.2f, y=%.2f, action=%s", wp.x, wp.y, wp.action.c_str());
+            }
         }
         catch (const std::exception &e)
         {
             RCLCPP_ERROR(this->get_logger(), "Erreur lors du chargement de la stratégie depuis '%s' : %s", filepath.c_str(), e.what());
         }
+    }
+
+    // Fonction pour exécuter la stratégie
+    void execute_strategy(const Strategy &strat)
+    {
+        // Envoie une commande d'action, pour chaque waypoint de la stratégie
+        // La commande est de la forme "ACTION:<action>:<x>:<y>"
+        for (const auto &wp : strat.waypoints)
+        {
+            std::ostringstream oss;
+            oss << "ACTION:" << wp.action << ":" << wp.x << ":" << wp.y;
+            std_msgs::msg::String action_msg;
+            action_msg.data = oss.str();
+            action_command_publisher_->publish(action_msg);
+            RCLCPP_INFO(this->get_logger(), "Commande d'action envoyée : %s", action_msg.data.c_str());
+            // Simuler un délai d'exécution avant de passer au waypoint suivant
+            // TODO: Système d'ACK
+            std::this_thread::sleep_for(2s);
+        }
+        RCLCPP_INFO(this->get_logger(), "Exécution de la stratégie terminée");
     }
 
     // Callback du timer pour envoyer STOP_MATCH à l'expiration du chrono

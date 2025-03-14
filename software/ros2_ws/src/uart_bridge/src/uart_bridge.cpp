@@ -19,6 +19,7 @@ class UARTBridgeNode : public rclcpp::Node
 public:
     UARTBridgeNode() : Node("uart_bridge_node")
     {
+        // Configuration du port série
         try
         {
             serial_.setPort("/dev/ttyTHS1");
@@ -29,7 +30,7 @@ public:
         }
         catch (serial::IOException &e)
         {
-            RCLCPP_ERROR(this->get_logger(), "Impossible d'ouvrir le port série /dev/ttyTHS1");
+            RCLCPP_ERROR(this->get_logger(), "Impossible d'ouvrir le port série /dev/ttyTHS1: %s", e.what());
         }
         if (serial_.isOpen())
         {
@@ -40,6 +41,7 @@ public:
             RCLCPP_ERROR(this->get_logger(), "Port série /dev/ttyTHS1 non ouvert");
         }
 
+        // Initialisation des Publishers / Subscribers
         strategy_pub_ = this->create_publisher<std_msgs::msg::String>("/strategy", 10);
         match_trigger_pub_ = this->create_publisher<std_msgs::msg::String>("/match_trigger", 10);
         match_command_sub_ = this->create_subscription<std_msgs::msg::String>(
@@ -53,6 +55,16 @@ public:
                 }
             });
 
+        action_command_sub_ = this->create_subscription<std_msgs::msg::String>(
+            "/action_command", 10,
+            [this](const std_msgs::msg::String::SharedPtr msg)
+            {
+                RCLCPP_INFO(this->get_logger(), "Commande ACTION reçue: %s", msg->data.c_str());
+                std::vector<uint8_t> payload(msg->data.begin(), msg->data.end());
+                send_uart_message(UART_CMD_ACTION, payload);
+            });
+
+        // Initialisation des timers
         timer_ = this->create_wall_timer(50ms, std::bind(&UARTBridgeNode::read_uart, this));
         timeout_timer_ = this->create_wall_timer(300ms, std::bind(&UARTBridgeNode::check_rx_timeout, this));
         ping_timer_ = this->create_wall_timer(5s, std::bind(&UARTBridgeNode::send_ping_callback, this));
@@ -140,6 +152,8 @@ private:
 
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr strategy_pub_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr match_trigger_pub_;
+
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr action_command_sub_;
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr match_command_sub_;
 
     rclcpp::TimerBase::SharedPtr timer_;
@@ -165,7 +179,6 @@ private:
     uint16_t msg_function_ = 0;
     uint16_t msg_payload_length_ = 0;
     std::vector<uint8_t> msg_payload_;
-
     Clock::time_point last_byte_time_;
 
     uint8_t calculate_checksum_direct()
@@ -225,7 +238,7 @@ private:
         }
     }
 
-    // Traitement des octets reçus par machine à états
+    // Traitement des octets reçus par la machine à états
     void process_byte(uint8_t byte)
     {
         switch (rcv_state_)
@@ -285,7 +298,7 @@ private:
         }
     }
 
-    // Traitement de la trame complète décodée
+    // Traitement de la trame décodée
     void process_message(uint16_t function, const std::vector<uint8_t> &payload)
     {
         RCLCPP_INFO(this->get_logger(), "Message décodé: Fonction=0x%04X, Taille payload=%zu", function, payload.size());
@@ -331,7 +344,7 @@ private:
         }
     }
 
-    // Fonction de reconnexion du port
+    // Tentative de reconnexion du port série
     void attempt_serial_reconnect()
     {
         if (!serial_.isOpen())
