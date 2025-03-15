@@ -25,3 +25,5 @@ software/server/node_modules/
 software/ros2_ws/install/
 software/ros2_ws/build/
 software/ros2_ws/log/
+
+.vscode/settings.json
