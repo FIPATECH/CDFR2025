@@ -30,11 +30,11 @@ void Screen2View::Send_Strategy()
     // Pour le test, si mon robot se trouve sur la moitié gauche de l'écran, alors il est JAUNE, sinon BLEUE.
     if (circle1_x < 160)
     {
-        teamColor = JAUNE;
+        teamColor = YELLOW;
     }
     else
     {
-        teamColor = BLEUE;
+        teamColor = BLUE;
     }
 
     // Cas 1 : les deux robots sur la moitié gauche

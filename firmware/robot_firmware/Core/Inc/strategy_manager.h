@@ -18,15 +18,15 @@ extern "C"
 
     typedef enum
     {
-        JAUNE = 0,
-        BLEUE = 1
+        BLUE = 0,
+        YELLOW = 1
     } Color;
 
     typedef struct
     {
-        int color;
-        int teamzone;
-        int ennemyzone;
+        int team_color;
+        int team_zone;
+        int ennemy_zone;
     } Strategy;
 
     void Apply_Strategy(Color teamColor, Zone teamZone, Zone enemyZone);
