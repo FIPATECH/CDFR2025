@@ -40,6 +40,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/circular_buffer.c</locationURI>
 		</link>
 		<link>
+			<name>Application/User/command_manager.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/command_manager.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/freertos.c</name>
 			<type>1</type>
 			<locationURI>$%7BPARENT-1-PROJECT_LOC%7D/Core/Src/freertos.c</locationURI>
@@ -58,6 +63,11 @@
 			<name>Application/User/odometry.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/odometry.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/servo_controller.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/servo_controller.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/stm32f4xx_hal_msp.c</name>
