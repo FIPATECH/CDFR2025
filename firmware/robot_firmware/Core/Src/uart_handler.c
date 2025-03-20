@@ -4,8 +4,10 @@
 #include "main.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "strategy_manager.h"
 #include "match_trigger.h"
+#include "command_manager.h"
 
 /* Utilisation de USART3 pour la communication */
 extern UART_HandleTypeDef huart3;
@@ -334,6 +336,17 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
         // Signaler la fin du match
         MatchTrigger_StopCallback();
         break;
+
+    case UART_CMD_ACTION:
+    {
+        char command[128] = {0};
+        size_t copy_length = (payloadLength < sizeof(command) - 1) ? payloadLength : sizeof(command) - 1;
+        memcpy(command, payload, copy_length);
+        command[copy_length] = '\0';
+
+        CommandManager_Process_Command(command);
+        break;
+    }
 
     default:
         break;

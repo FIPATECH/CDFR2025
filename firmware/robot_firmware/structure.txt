@@ -2,6 +2,7 @@ Structure du dossier pour le volume Acer
 Le numéro de série du volume est C040-4F1C
 C:.
 |   .extSettings
+|   .mxproject
 |   backup_robot_firmware.ioc
 |   changelog.txt
 |   readme.md
@@ -10,23 +11,34 @@ C:.
 |   
 +---Core
 |   +---Inc
+|   |       circular_buffer.h
+|   |       command_manager.h
 |   |       FreeRTOSConfig.h
 |   |       main.h
+|   |       match_trigger.h
 |   |       odometry.h
 |   |       RTE_Components.h
+|   |       servo_controller.h
 |   |       stm32f4xx_hal_conf.h
 |   |       stm32f4xx_it.h
 |   |       strategy_manager.h
+|   |       uart_commands.h
+|   |       uart_handler.h
 |   |       
 |   +---Src
+|   |       circular_buffer.c
+|   |       command_manager.c
 |   |       freertos.c
 |   |       main.c
+|   |       match_trigger.c
 |   |       odometry.c
+|   |       servo_controller.c
 |   |       stm32f4xx_hal_msp.c
 |   |       stm32f4xx_hal_timebase_tim.c
 |   |       stm32f4xx_it.c
 |   |       strategy_manager.c
 |   |       system_stm32f4xx.c
+|   |       uart_handler.c
 |   |       
 |   \---Startup
 |           startup_stm32f429zitx.s
@@ -139,6 +151,7 @@ C:.
 |       |   |   stm32f4xx_hal_sram.h
 |       |   |   stm32f4xx_hal_tim.h
 |       |   |   stm32f4xx_hal_tim_ex.h
+|       |   |   stm32f4xx_hal_uart.h
 |       |   |   stm32f4xx_ll_bus.h
 |       |   |   stm32f4xx_ll_cortex.h
 |       |   |   stm32f4xx_ll_crc.h
@@ -152,6 +165,8 @@ C:.
 |       |   |   stm32f4xx_ll_rcc.h
 |       |   |   stm32f4xx_ll_spi.h
 |       |   |   stm32f4xx_ll_system.h
+|       |   |   stm32f4xx_ll_tim.h
+|       |   |   stm32f4xx_ll_usart.h
 |       |   |   stm32f4xx_ll_utils.h
 |       |   |   
 |       |   \---Legacy
@@ -186,6 +201,7 @@ C:.
 |               stm32f4xx_hal_sram.c
 |               stm32f4xx_hal_tim.c
 |               stm32f4xx_hal_tim_ex.c
+|               stm32f4xx_hal_uart.c
 |               stm32f4xx_ll_fmc.c
 |               
 +---EWARM
@@ -1072,6 +1088,14 @@ C:.
 |   |   |   |       subdir.mk
 |   |   |   |       
 |   |   |   \---User
+|   |   |       |   circular_buffer.cyclo
+|   |   |       |   circular_buffer.d
+|   |   |       |   circular_buffer.o
+|   |   |       |   circular_buffer.su
+|   |   |       |   command_manager.cyclo
+|   |   |       |   command_manager.d
+|   |   |       |   command_manager.o
+|   |   |       |   command_manager.su
 |   |   |       |   freertos.cyclo
 |   |   |       |   freertos.d
 |   |   |       |   freertos.o
@@ -1080,10 +1104,18 @@ C:.
 |   |   |       |   main.d
 |   |   |       |   main.o
 |   |   |       |   main.su
+|   |   |       |   match_trigger.cyclo
+|   |   |       |   match_trigger.d
+|   |   |       |   match_trigger.o
+|   |   |       |   match_trigger.su
 |   |   |       |   odometry.cyclo
 |   |   |       |   odometry.d
 |   |   |       |   odometry.o
 |   |   |       |   odometry.su
+|   |   |       |   servo_controller.cyclo
+|   |   |       |   servo_controller.d
+|   |   |       |   servo_controller.o
+|   |   |       |   servo_controller.su
 |   |   |       |   stm32f4xx_hal_msp.cyclo
 |   |   |       |   stm32f4xx_hal_msp.d
 |   |   |       |   stm32f4xx_hal_msp.o
@@ -1109,6 +1141,14 @@ C:.
 |   |   |       |   sysmem.d
 |   |   |       |   sysmem.o
 |   |   |       |   sysmem.su
+|   |   |       |   uart_comm.cyclo
+|   |   |       |   uart_comm.d
+|   |   |       |   uart_comm.o
+|   |   |       |   uart_comm.su
+|   |   |       |   uart_handler.cyclo
+|   |   |       |   uart_handler.d
+|   |   |       |   uart_handler.o
+|   |   |       |   uart_handler.su
 |   |   |       |   
 |   |   |       +---generated
 |   |   |       |       ApplicationFontProvider.cyclo
@@ -1435,6 +1475,10 @@ C:.
 |   |   |           stm32f4xx_hal_tim_ex.d
 |   |   |           stm32f4xx_hal_tim_ex.o
 |   |   |           stm32f4xx_hal_tim_ex.su
+|   |   |           stm32f4xx_hal_uart.cyclo
+|   |   |           stm32f4xx_hal_uart.d
+|   |   |           stm32f4xx_hal_uart.o
+|   |   |           stm32f4xx_hal_uart.su
 |   |   |           stm32f4xx_ll_fmc.cyclo
 |   |   |           stm32f4xx_ll_fmc.d
 |   |   |           stm32f4xx_ll_fmc.o
@@ -1676,6 +1720,8 @@ C:.
     |   \---STM32F429IDISCO
     |       +---Core
     |       |   \---Src
+    |       |           circular_buffer.d
+    |       |           circular_buffer.o
     |       |           freertos.d
     |       |           freertos.o
     |       |           main.d
@@ -1688,8 +1734,12 @@ C:.
     |       |           stm32f4xx_hal_timebase_tim.o
     |       |           stm32f4xx_it.d
     |       |           stm32f4xx_it.o
+    |       |           strategy_manager.d
+    |       |           strategy_manager.o
     |       |           system_stm32f4xx.d
     |       |           system_stm32f4xx.o
+    |       |           uart_handler.d
+    |       |           uart_handler.o
     |       |           
     |       +---Drivers
     |       |   +---BSP
@@ -1760,6 +1810,8 @@ C:.
     |       |               stm32f4xx_hal_tim.o
     |       |               stm32f4xx_hal_tim_ex.d
     |       |               stm32f4xx_hal_tim_ex.o
+    |       |               stm32f4xx_hal_uart.d
+    |       |               stm32f4xx_hal_uart.o
     |       |               stm32f4xx_ll_fmc.d
     |       |               stm32f4xx_ll_fmc.o
     |       |               

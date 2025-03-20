@@ -27,6 +27,9 @@
 #include "Components/ili9341/ili9341.h"
 #include "uart_handler.h"
 #include "match_trigger.h"
+#include "command_manager.h"
+#include "servo_controller.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -74,6 +77,8 @@ LTDC_HandleTypeDef hltdc;
 
 SPI_HandleTypeDef hspi5;
 
+TIM_HandleTypeDef htim3;
+
 UART_HandleTypeDef huart3;
 
 SDRAM_HandleTypeDef hsdram1;
@@ -107,6 +112,13 @@ const osThreadAttr_t MatchTriggerTask_attributes = {
     .stack_size = 256 * 4,
     .priority = (osPriority_t)osPriorityNormal,
 };
+/* Definitions for ActionTriggerTask */
+osThreadId_t ActionTaskHandle;
+const osThreadAttr_t ActionTask_attributes = {
+    .name = "Action_Task",
+    .stack_size = 256 * 4,
+    .priority = (osPriority_t)osPriorityNormal,
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,6 +131,7 @@ static void MX_FMC_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_DMA2D_Init(void);
 static void MX_USART3_UART_Init(void);
+static void MX_TIM3_Init(void);
 void StartDefaultTask(void *argument);
 extern void TouchGFX_Task(void *argument);
 
@@ -212,12 +225,14 @@ int main(void)
   MX_LTDC_Init();
   MX_DMA2D_Init();
   MX_USART3_UART_Init();
+  MX_TIM3_Init();
   MX_TouchGFX_Init();
   /* Call PreOsInit function */
   MX_TouchGFX_PreOSInit();
   /* USER CODE BEGIN 2 */
   LED_Init();
   UART_Init();
+  Servo_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -236,6 +251,7 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* USER CODE BEGIN RTOS_QUEUES */
+  actionQueueHandle = osMessageQueueNew(10, ACTION_MSG_SIZE, NULL);
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
@@ -249,6 +265,7 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   UART_TaskHandle = osThreadNew(UART_Task, NULL, &UART_Task_attributes);
   MatchTriggerTaskHandle = osThreadNew(MatchTriggerTask, NULL, &MatchTriggerTask_attributes);
+  ActionTaskHandle = osThreadNew(Action_Task, NULL, &ActionTask_attributes);
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
@@ -531,6 +548,54 @@ static void MX_SPI5_Init(void)
   /* USER CODE BEGIN SPI5_Init 2 */
 
   /* USER CODE END SPI5_Init 2 */
+}
+
+/**
+ * @brief TIM3 Initialization Function
+ * @param None
+ * @retval None
+ */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  TIM_OC_InitTypeDef sConfigOC = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 89;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 19999;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_PWM_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = 1500;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  if (HAL_TIM_PWM_ConfigChannel(&htim3, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+  HAL_TIM_MspPostInit(&htim3);
 }
 
 /**
