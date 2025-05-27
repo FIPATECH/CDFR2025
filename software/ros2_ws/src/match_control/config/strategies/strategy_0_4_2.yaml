@@ -1,30 +1,10 @@
 id: "0:4:2"
-name: "FIPATECH: BLUE -> CENTER_LEFT / ENNEMY: YELLOW -> BOTTOM_LEFT"
+name: "HOMOLOGATION"
 team_color: "0"
 team_zone: "4"
 enemy_zone: "2"
 waypoints:
-  - x: 150.0
-    y: 600.0
-    action: "MOVE"
-  - x: 150.0
-    y: 600.0
-    action: "OPEN_GRIPPER"
-  - x: 800.0
-    y: 600.0
-    action: "MOVE"
-  - x: 800.0
-    y: 600.0
-    action: "RAISE_ARM"
-  - x: 1200.0
-    y: 400.0
-    action: "MOVE"
-  - x: 1200.0
-    y: 400.0
-    action: "LOWER_ARM"
-  - x: 1200.0
-    y: 400.0
-    action: "RELEASE"
-  - x: 300.0
-    y: 300.0
+  - x: 22.5    # position de départ en cm
+    y: 100.0    # on monte jusqu’à 50 cm
+    theta: 00.0  # orientation vers le haut
     action: "MOVE"

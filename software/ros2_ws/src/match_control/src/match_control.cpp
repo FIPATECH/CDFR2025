@@ -17,6 +17,7 @@ struct Waypoint
 {
     double x;
     double y;
+    double theta;
     std::string action;
 };
 
@@ -47,6 +48,7 @@ Strategy load_strategy_from_file(const std::string &filepath)
             Waypoint waypoint;
             waypoint.x = wp["x"].as<double>();
             waypoint.y = wp["y"].as<double>();
+            waypoint.theta = wp["theta"].as<double>();
             waypoint.action = wp["action"].as<std::string>();
             strat.waypoints.push_back(waypoint);
         }
@@ -91,7 +93,7 @@ public:
         // Publisher pour envoyer STOP_MATCH sur /match_command à la fin du match
         match_command_publisher_ = this->create_publisher<std_msgs::msg::String>("/match_command", 10);
 
-        // Publisher pour envoyer des commandes d'action vers la STM32
+        // Publisher pour envoyer des commandes d'action vers la STM32 et au noeud de navigation)
         action_command_publisher_ = this->create_publisher<std_msgs::msg::String>("/action_command", 10);
 
         RCLCPP_INFO(this->get_logger(), "MatchControlNode démarré");
@@ -102,10 +104,14 @@ private:
     rclcpp::Subscription<std_msgs::msg::String>::SharedPtr strategy_subscriber_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr match_command_publisher_;
     rclcpp::Publisher<std_msgs::msg::String>::SharedPtr action_command_publisher_;
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr nav_status_subscriber_;
     rclcpp::TimerBase::SharedPtr match_timer_;
 
-    const std::chrono::seconds match_duration_{100};
+    const std::chrono::seconds match_duration_{98};
     Strategy current_strategy_;
+
+    // Flag pour la synchronisation avec l'ACK de navigation
+    bool nav_ack_received_ = false;
 
     // Callback pour la réception de START_MATCH
     void match_trigger_callback(const std_msgs::msg::String::SharedPtr msg)
@@ -117,6 +123,12 @@ private:
             match_timer_ = this->create_wall_timer(
                 match_duration_,
                 std::bind(&MatchControlNode::match_timer_callback, this));
+
+            // Souscription au topic navigation_status pour recevoir les ACK de navigation
+            nav_status_subscriber_ = this->create_subscription<std_msgs::msg::String>(
+                "navigation_status", 10,
+                std::bind(&MatchControlNode::navStatusCallback, this, std::placeholders::_1));
+
             // Exécuter la stratégie dans un thread séparé
             std::thread strategy_thread(&MatchControlNode::execute_strategy, this, current_strategy_);
             strategy_thread.detach();
@@ -143,22 +155,48 @@ private:
         }
     }
 
+    // Callback pour le topic navigation_status qui reçoit l'ACK de navigation
+    void navStatusCallback(const std_msgs::msg::String::SharedPtr msg)
+    {
+        RCLCPP_INFO(this->get_logger(), "ACK de navigation reçu: %s", msg->data.c_str());
+        if (msg->data.find("ACK:MOVE:") != std::string::npos)
+        {
+            nav_ack_received_ = true;
+        }
+    }
+
     // Fonction pour exécuter la stratégie
     void execute_strategy(const Strategy &strat)
     {
         // Envoie une commande d'action, pour chaque waypoint de la stratégie
-        // La commande est de la forme "ACTION:<action>:<x>:<y>"
+        // La commande est de la forme "ACTION:<action>:<x>:<y>:<theta_deg>"
         for (const auto &wp : strat.waypoints)
         {
+            // Construire la commande d'action
             std::ostringstream oss;
-            oss << "ACTION:" << wp.action << ":" << wp.x << ":" << wp.y;
+            oss << "ACTION:" << wp.action << ":" << wp.x << ":" << wp.y << ":" << wp.theta;
             std_msgs::msg::String action_msg;
             action_msg.data = oss.str();
+
+            // Publier la commande
             action_command_publisher_->publish(action_msg);
             RCLCPP_INFO(this->get_logger(), "Commande d'action envoyée : %s", action_msg.data.c_str());
+
+            // Attendre que le flag ACK soit reçu
+            nav_ack_received_ = false;
+            auto start_time = this->now();
+            while (!nav_ack_received_)
+            {
+                if ((this->now() - start_time).seconds() > 10.0)
+                {
+                    RCLCPP_WARN(this->get_logger(), "Timeout d'attente de l'ACK pour le waypoint : x=%.2f, y=%.2f", wp.x, wp.y);
+                    break;
+                }
+                rclcpp::sleep_for(100ms);
+            }
             // Simuler un délai d'exécution avant de passer au waypoint suivant
-            // TODO: Système d'ACK
-            std::this_thread::sleep_for(2s);
+
+            rclcpp::sleep_for(2s);
         }
         RCLCPP_INFO(this->get_logger(), "Exécution de la stratégie terminée");
     }

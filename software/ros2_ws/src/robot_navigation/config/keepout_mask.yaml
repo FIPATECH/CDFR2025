@@ -1,0 +1,7 @@
+image: keepout_mask.pgm
+resolution: 0.01 # même résolution que table_map
+origin: [-1.51, -1.02, 0.0] # même origine que table_map.yaml
+negate: 0 # 0 = noir = obstacle, blanc = libre
+occupied_thresh: 0.65
+free_thresh: 0.196
+
