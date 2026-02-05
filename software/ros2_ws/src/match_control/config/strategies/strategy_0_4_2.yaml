@@ -1,0 +1,10 @@
+id: "0:4:2"
+name: "HOMOLOGATION"
+team_color: "0"
+team_zone: "4"
+enemy_zone: "2"
+waypoints:
+  - x: 22.5    # position de départ en cm
+    y: 100.0    # on monte jusqu’à 50 cm
+    theta: 00.0  # orientation vers le haut
+    action: "MOVE"

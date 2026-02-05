@@ -1,0 +1,6 @@
+image: "table_map.pgm"
+resolution: 0.01              # mètre par pixel, même que pour le mask
+origin: [-1.51, -1.02, 0.0]   # identique au mask
+negate: 0
+occupied_thresh: 0.65         # noir = obstacle fixe
+free_thresh: 0.196            # blanc = libre
