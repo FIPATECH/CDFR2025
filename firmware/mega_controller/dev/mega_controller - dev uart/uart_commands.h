@@ -1,0 +1,21 @@
+// File: uart_commands.h
+
+#ifndef UART_COMMANDS_H
+#define UART_COMMANDS_H
+
+#define UART_CMD_STRATEGY 0x0001
+#define UART_CMD_TEXT 0x0002
+#define UART_CMD_PING 0x0003
+#define UART_CMD_PONG 0x0004
+#define UART_CMD_STOP_MATCH 0x0005
+#define UART_CMD_START_MATCH 0x0006
+#define UART_CMD_ACTION 0x0007
+#define UART_CMD_ACTION_ACK 0x0008
+#define UART_CMD_VEL 0x0009
+#define UART_CMD_ODOM 0x0103
+#define UART_CMD_PID 0x0104
+
+// --- NOUVEAU : message contenant le nombre de points à afficher
+#define UART_CMD_POINTS 0x0105  // *** NEW ***
+
+#endif /* UART_COMMANDS_H */

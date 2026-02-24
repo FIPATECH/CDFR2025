@@ -2,19 +2,6 @@
   "Application": {
     "Screens": [
       {
-        "Name": "Screen1",
-        "Components": [
-          {
-            "Type": "Image",
-            "Name": "image1",
-            "Width": 320,
-            "Height": 240,
-            "RelativeFilename": "image1.png"
-          }
-        ],
-        "Interactions": []
-      },
-      {
         "Name": "Screen2",
         "CanvasBufferSize": 4800,
         "Components": [
@@ -65,7 +52,7 @@
             "Color": {
               "Red": 235,
               "Green": 35,
-              "Blue": 35
+              "Blue": 235
             },
             "CenterX": 20.0,
             "CenterY": 20.0,

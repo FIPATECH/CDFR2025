@@ -70,7 +70,8 @@ TouchGFX/build/STM32F429IDISCO/TouchGFX/gui/src/screen2_screen/Screen2View.o: \
  Middlewares/ST/touchgfx/framework/include/touchgfx/Texts.hpp \
  Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Button.hpp \
  Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/AbstractButton.hpp \
- Middlewares/ST/touchgfx/framework/include/touchgfx/mixins/ClickListener.hpp
+ Middlewares/ST/touchgfx/framework/include/touchgfx/mixins/ClickListener.hpp \
+ TouchGFX/gui/include/../../../Core/Inc/strategy_manager.h
 
 TouchGFX/gui/include/gui/screen2_screen/Screen2View.hpp:
 
@@ -213,3 +214,5 @@ Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/Button.hpp:
 Middlewares/ST/touchgfx/framework/include/touchgfx/widgets/AbstractButton.hpp:
 
 Middlewares/ST/touchgfx/framework/include/touchgfx/mixins/ClickListener.hpp:
+
+TouchGFX/gui/include/../../../Core/Inc/strategy_manager.h:

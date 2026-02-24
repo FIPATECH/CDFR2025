@@ -33,6 +33,7 @@ TouchGFX/build/STM32F429IDISCO/Core/Src/main.o: Core/Src/main.c \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_spi.h \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
+ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  Core/Inc/FreeRTOSConfig.h \
@@ -45,7 +46,13 @@ TouchGFX/build/STM32F429IDISCO/Core/Src/main.o: Core/Src/main.c \
  Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  TouchGFX/App/app_touchgfx.h Drivers/BSP/Components/ili9341/ili9341.h \
- Drivers/BSP/Components/ili9341/../Common/lcd.h
+ Drivers/BSP/Components/ili9341/../Common/lcd.h Core/Inc/uart_handler.h \
+ Core/Inc/match_trigger.h Core/Inc/command_manager.h \
+ Core/Inc/motor_controller.h Core/Inc/main.h Core/Inc/servo_controller.h \
+ Core/Inc/i2c_handler.h Core/Inc/motion_controller.h Core/Inc/odometry.h \
+ Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h \
+ Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
+ Middlewares/Third_Party/FreeRTOS/Source/include/task.h
 
 Core/Inc/main.h:
 
@@ -121,6 +128,8 @@ Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 
 Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 
+Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+
 Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 
 Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
@@ -148,3 +157,27 @@ TouchGFX/App/app_touchgfx.h:
 Drivers/BSP/Components/ili9341/ili9341.h:
 
 Drivers/BSP/Components/ili9341/../Common/lcd.h:
+
+Core/Inc/uart_handler.h:
+
+Core/Inc/match_trigger.h:
+
+Core/Inc/command_manager.h:
+
+Core/Inc/motor_controller.h:
+
+Core/Inc/main.h:
+
+Core/Inc/servo_controller.h:
+
+Core/Inc/i2c_handler.h:
+
+Core/Inc/motion_controller.h:
+
+Core/Inc/odometry.h:
+
+Middlewares/Third_Party/FreeRTOS/Source/include/semphr.h:
+
+Middlewares/Third_Party/FreeRTOS/Source/include/queue.h:
+
+Middlewares/Third_Party/FreeRTOS/Source/include/task.h:

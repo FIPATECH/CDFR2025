@@ -8,18 +8,25 @@ extern "C"
 
 #include "cmsis_os.h"
 
-#define ACTION_MSG_SIZE 32
-    // Déclaration de la file pour stocker les commandes d'action
+#define ACTION_MSG_SIZE 64
+
     extern osMessageQueueId_t actionQueueHandle;
 
-    // Fonction appelée pour traiter une commande reçue
-    void CommandManager_Process_Command(const char *command);
-
-    // Tâche dédiée au traitement des commandes d'action
+    /**
+     * @brief Tâche qui récupère les commandes dans la file d'action
+     *        et exécute les actions correspondantes.
+     */
     void Action_Task(void *argument);
+
+    /**
+     * @brief   Traite une commande brute reçue :
+     *          - Si format ACTION:<name>:x:y → poste en file pour Action_Task
+     *          - Sinon → exécution immédiate via I²C
+     */
+    void CommandManager_Process_Command(const char *command);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // COMMAND_MANAGER_H
+#endif /* COMMAND_MANAGER_H */

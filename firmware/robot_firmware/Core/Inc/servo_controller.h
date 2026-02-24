@@ -6,21 +6,29 @@ extern "C"
 {
 #endif
 
+#include "main.h"
 #include "stm32f4xx_hal.h"
 
-// Plages en microsecondes pour un servo standard :
-// Pour un servo à rotation continue, 1000 pour tourner et 1500 pour stopper
-#define SERVO_MIN_PULSE 1000  // 1 ms pour rotation (ex : OPEN_GRIPPER)
-#define SERVO_STOP_PULSE 1500 // 1.5 ms pour stopper
-#define SERVO_MAX_PULSE 2000  // 2 ms pour rotation dans l'autre sens
-#define SERVO_PERIOD 20000    // 20 ms (50 Hz)
+// Valeurs de PWM (µs) provenants des tests
+#define NEUTRAL_POSITION_LEFT 1800
+#define NEUTRAL_POSITION_RIGHT 1500
 
-    void Servo_Init(void);
-    void SetServoAngle(uint8_t angle);
+#define OPEN_POSITION_LEFT 1400
+#define OPEN_POSITION_RIGHT 1800
+
+#define CLOSE_POSITION_LEFT 1400
+#define CLOSE_POSITION_RIGHT 1900
+
+// Durée d'exécution des actions (ms)
+#define OPEN_GRIPPER_DURATION 10000
+#define CLOSE_GRIPPER_DURATION 10000
+
+    void ServoController_Init(void);
     void Execute_Open_Gripper(void);
+    void Execute_Close_Gripper(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // SERVO_CONTROLLER_H
+#endif /* SERVO_CONTROLLER_H */

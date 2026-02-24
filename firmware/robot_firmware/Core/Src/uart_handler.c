@@ -8,6 +8,7 @@
 #include "strategy_manager.h"
 #include "match_trigger.h"
 #include "command_manager.h"
+#include "motion_controller.h"
 
 /* Utilisation de USART3 pour la communication */
 extern UART_HandleTypeDef huart3;
@@ -305,10 +306,6 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
 {
     switch (function)
     {
-    case UART_CMD_STRATEGY:
-        // Apply_Strategy(1, 1, 1);
-        break;
-
     case UART_CMD_PING:
         UART_Encode_And_Send_Message(UART_CMD_PONG, 0, NULL);
         break;
@@ -347,6 +344,20 @@ void UART_Process_Decoded_Message(uint16_t function, uint16_t payloadLength, con
         CommandManager_Process_Command(command);
         break;
     }
+
+    case UART_CMD_VEL:
+        // on attend 12 octets : 4 pour v, 4 pour w, 4 pour tick
+        if (payloadLength == 12)
+        {
+            float v, w;
+            uint32_t tick;
+            memcpy(&v, &payload[0], 4);
+            memcpy(&w, &payload[4], 4);
+            memcpy(&tick, &payload[8], 4);
+            // passe les nouvelles consignes à la tâche Motion
+            Motion_SetNewCommand(v, w);
+        }
+        break;
 
     default:
         break;

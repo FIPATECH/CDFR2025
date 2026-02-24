@@ -1,42 +1,62 @@
 #include "servo_controller.h"
+#include "cmsis_os.h"
 
-extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim9;  // Servo 1 sur TIM9_CH2 (PE6)
+extern TIM_HandleTypeDef htim10; // Servo 2 sur TIM10_CH1 (PF6)
 
 /**
- * @brief Convertit un angle (0 à 180°) en largeur d'impulsion en microsecondes.
- * Pour un servo à rotation continue, on utilise :
- *  - 0°  -> SERVO_MIN_PULSE (pour tourner à pleine vitesse dans un sens)
- *  - 90° -> SERVO_STOP_PULSE (pour arrêter)
- *  - 180° -> SERVO_MAX_PULSE (pour tourner à pleine vitesse dans l'autre sens)
+ * @brief Initialise le PWM pour les deux servos.
  */
-static uint32_t AngleToPulse(uint8_t angle)
+void ServoController_Init(void)
 {
-  if (angle > 180)
-    angle = 180;
-  return SERVO_MIN_PULSE + ((SERVO_MAX_PULSE - SERVO_MIN_PULSE) * angle) / 180;
-}
+  // Démarre TIM9_CH2 (PE6)
+  HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_2);
+  // Démarre TIM10_CH1 (PF6)
+  HAL_TIM_PWM_Start(&htim10, TIM_CHANNEL_1);
 
-void Servo_Init(void)
-{
-  // Démarre le PWM sur TIM3, Canal 1
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
-}
-
-void SetServoAngle(uint8_t angle)
-{
-  uint32_t pulse = AngleToPulse(angle);
-  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, pulse);
+  // Position neutre des deux servos
+  __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_2, NEUTRAL_POSITION_LEFT);
+  __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, NEUTRAL_POSITION_RIGHT);
 }
 
 /**
- * @brief Exécute l'action OPEN_GRIPPER : fait tourner le servo pendant 5 secondes puis arrête le servo.
+ * @brief Ouvre la pince :
+ *        - servo gauche (TIM9_CH2) vers OPEN_POSITION_LEFT
+ *        - servo droit   (TIM10_CH1) vers OPEN_POSITION_RIGHT
+ *        attend OPEN_GRIPPER_DURATION ms,
+ *        puis revient en neutre.
  */
 void Execute_Open_Gripper(void)
 {
-  // Commande pour tourner : ici, on choisit 0° (pulse = 1000 µs) pour "ouvrir la pince"
-  SetServoAngle(0);
-  // Attendre 5 secondes
-  osDelay(5000);
-  // Arrêter le servo en envoyant le signal neutre (90° -> 1500 µs)
-  SetServoAngle(90);
+  __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_2, OPEN_POSITION_LEFT);
+  __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, OPEN_POSITION_RIGHT);
+
+  osDelay(OPEN_GRIPPER_DURATION);
+
+  // Retour en position neutre
+  __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_2, NEUTRAL_POSITION_LEFT);
+  __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, NEUTRAL_POSITION_RIGHT);
+
+  // TODO: envoyer ACK OPEN_GRIPPER
+}
+
+/**
+ * @brief Ferme la pince :
+ *        - servo gauche (TIM9_CH2) vers CLOSE_POSITION_LEFT
+ *        - servo droit   (TIM10_CH1) vers CLOSE_POSITION_RIGHT
+ *        attend CLOSE_GRIPPER_DURATION ms,
+ *        puis revient en neutre.
+ */
+void Execute_Close_Gripper(void)
+{
+  __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_2, CLOSE_POSITION_LEFT);
+  __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, CLOSE_POSITION_RIGHT);
+
+  osDelay(CLOSE_GRIPPER_DURATION);
+
+  // Retour en position neutre
+  __HAL_TIM_SET_COMPARE(&htim9, TIM_CHANNEL_2, NEUTRAL_POSITION_LEFT);
+  __HAL_TIM_SET_COMPARE(&htim10, TIM_CHANNEL_1, NEUTRAL_POSITION_RIGHT);
+
+  // TODO: envoyer ACK CLOSE_GRIPPER
 }
